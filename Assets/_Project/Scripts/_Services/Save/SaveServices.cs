@@ -22,6 +22,9 @@ namespace _Project.Scripts._Services.Save
         public PlayerSaveData Load()
         {
             string json = PlayerPrefs.GetString(SAVE_KEY);
+            
+            Debug.Log($"Load Json: {json}");
+            
             return JsonUtility.FromJson<PlayerSaveData>(json);
         }
     }

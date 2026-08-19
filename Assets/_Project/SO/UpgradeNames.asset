@@ -13,14 +13,14 @@ MonoBehaviour:
   m_Name: UpgradeNames
   m_EditorClassIdentifier: 
   <FirstUpgradeName>k__BackingField:
-  - Upgrade 1
-  - Upgrade 1
-  - Upgrade 1
-  - Upgrade 1
-  - Upgrade 1
+  - '"Upgrade 1"'
+  - '"Upgrade 1"'
+  - '"Upgrade 1"'
+  - '"Upgrade 1"'
+  - '"Upgrade 1"'
   <SecondUpgradeName>k__BackingField:
-  - Upgrade 2
-  - Upgrade 2
-  - Upgrade 2
-  - Upgrade 2
-  - Upgrade 2
+  - '"Upgrade 2"'
+  - '"Upgrade 2"'
+  - '"Upgrade 2"'
+  - '"Upgrade 2"'
+  - '"Upgrade 2"'

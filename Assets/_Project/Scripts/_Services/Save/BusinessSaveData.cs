@@ -1,8 +1,14 @@
+using System;
+
 namespace _Project.Scripts._Services.Save
 {
+    [Serializable]
     public class BusinessSaveData
     {
+        public int ID;
         public int Level;
-        public float CurrentIncome;
+        public double CurrentIncome;
+        public double FirstUpgradeIncome;
+        public double SecondUpgradeIncome;
     }
 }

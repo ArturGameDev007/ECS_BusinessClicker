@@ -6,6 +6,8 @@ using _Project.Scripts.UI.Gameplay.Balance;
 using _Project.Scripts.UI.Gameplay.BarIncome;
 using _Project.Scripts.UI.Gameplay.BusinessModel;
 using _Project.Scripts.UI.Gameplay.ButtonLVLUp;
+using _Project.Scripts.UI.Gameplay.ButtonUpBaseIncome;
+using _Project.Scripts.UI.Gameplay.IncomeUpgrades;
 using _Project.Scripts.UI.Gameplay.NamesBusinessAndUpgrades;
 using Leopotam.EcsLite;
 
@@ -15,68 +17,84 @@ namespace _Project.Scripts._Infrastructure
     {
         private readonly EcsWorld _world;
         private readonly BusinessFactory _businessFactory;
-        
+        private readonly SaveServices _saveServices;
+
         private readonly BusinessNamesConfig _businessNamesConfig;
         private readonly UpgradeNamesConfig _upgradeNamesConfig;
-        private readonly BarIncomeConfig _barIncomeConfig;
-        
+
         private readonly BusinessNamePresenter _businessNamePresenter;
+        private readonly ButtonLevelUpPresenter _buttonLevelUpPresenter;
         private readonly UpgradeNamesPresenter _upgradeNamesPresenter;
         private readonly BusinessInformationPresenter _businessInformationPresenter;
         private readonly PriceLevelUpPresenter _levelUpPresenter;
         private readonly BarIncomePresenter _barIncomePresenter;
-        private readonly BarIncomeModel _barIncomeModel;
-        private readonly SaveServices _saveServices;
+        private readonly IncomeUpgradePresenter _incomeUpgradePresenter;
+        private readonly ButtonUpIncomePresenter _buttonUpIncomePresenter;
+        private readonly PriceUpgradePresenter _priceUpgradePresenter;
+        // private readonly BarIncomeModel _barIncomeModel;
+
+        private readonly BalanceModel _balanceModel;
+
         private readonly BalancePresenter _balancePresenter;
-        private readonly BalanceModel _balance;
 
         private EcsSystems _systems;
+        private EcsFilter _businessFilter;
+        private EcsPool<BusinessComponents> _businessComponentsPool;
 
-        public EcsManager(EcsWorld world, BusinessFactory businessFactory, BusinessNamesConfig businessNamesConfig, UpgradeNamesConfig upgradeNamesConfig,
-            BarIncomeConfig incomeConfig, BusinessNamePresenter businessNamePresenter,
+        public EcsManager(EcsWorld world, BusinessFactory businessFactory, SaveServices saveServices,
+            BusinessNamesConfig businessNamesConfig,
+            UpgradeNamesConfig upgradeNamesConfig,
+            BusinessNamePresenter businessNamePresenter, ButtonLevelUpPresenter buttonLevelUpPresenter,
             UpgradeNamesPresenter upgradeNamesPresenter, BusinessInformationPresenter businessInformationPresenter,
-            PriceLevelUpPresenter levelUpPresenter, BarIncomePresenter incomePresenter, BarIncomeModel barIncomeModel,
-            SaveServices saveServices,
-            BalancePresenter balancePresenter, BalanceModel balanceModel)
+            PriceLevelUpPresenter levelUpPresenter, BarIncomePresenter incomePresenter,
+            IncomeUpgradePresenter incomeUpgradePresenter, ButtonUpIncomePresenter buttonUpIncomePresenter,
+            PriceUpgradePresenter priceUpgradePresenter, BalanceModel balanceModel,
+            BalancePresenter balancePresenter)
         {
             _world = world;
             _businessFactory = businessFactory;
+            _saveServices = saveServices;
             _businessNamesConfig = businessNamesConfig;
             _upgradeNamesConfig = upgradeNamesConfig;
-            _barIncomeConfig = incomeConfig;
             _businessNamePresenter = businessNamePresenter;
+            _buttonLevelUpPresenter = buttonLevelUpPresenter;
             _upgradeNamesPresenter = upgradeNamesPresenter;
             _businessInformationPresenter = businessInformationPresenter;
             _levelUpPresenter = levelUpPresenter;
             _barIncomePresenter = incomePresenter;
-            _barIncomeModel = barIncomeModel;
-            _saveServices = saveServices;
+            _incomeUpgradePresenter = incomeUpgradePresenter;
+            _buttonUpIncomePresenter = buttonUpIncomePresenter;
+            _priceUpgradePresenter = priceUpgradePresenter;
+            // _barIncomeModel = barIncomeModel;
+            _balanceModel = balanceModel;
             _balancePresenter = balancePresenter;
-            _balance = balanceModel;
+
+            _businessFilter = _world.Filter<BusinessComponents>().End();
+            _businessComponentsPool = world.GetPool<BusinessComponents>();
         }
 
         public void Init()
         {
             _systems = new EcsSystems(_world);
-            
+
             BusinessNames();
 
             _systems
-                .Add(new GenerateIncomeSystem(_barIncomePresenter, _barIncomeModel, _balance, _balancePresenter))
+                .Add(new GenerateIncomeSystem(_barIncomePresenter, _balancePresenter, _balanceModel))
                 .Init();
-            
+
             CreateBusiness();
-            
-            _balancePresenter?.UpdateBalancePlayer(_balance.Amount);
-            
             RefreshUi();
+
+            _buttonLevelUpPresenter?.Init();
+            _buttonUpIncomePresenter?.Init();
+
+            _buttonUpIncomePresenter?.UpdateUpgradesUI();
         }
 
         public void Tick()
         {
             _systems.Run();
-
-            RefreshUi();
         }
 
         public void Destroy()
@@ -84,23 +102,33 @@ namespace _Project.Scripts._Infrastructure
             SaveDataPlayer();
 
             _world.Destroy();
+            _buttonLevelUpPresenter?.Destroy();
+            _buttonUpIncomePresenter?.Destroy();
         }
 
         private void CreateBusiness()
         {
-            _businessFactory.CreatePlayer(_balance.Amount);
-            
-            _businessFactory.CreateBusiness(index: 0, startLevel: 1, baseIncome: 3d);
-            _businessFactory.CreateBusiness(index: 1, startLevel: 0, baseIncome: 40d);
-            _businessFactory.CreateBusiness(index: 2, startLevel: 0, baseIncome: 200d);
-            _businessFactory.CreateBusiness(index: 3, startLevel: 0, baseIncome: 1000d);
-            _businessFactory.CreateBusiness(index: 4, startLevel: 0, baseIncome: 5000d);
+            PlayerSaveData loadedData = _saveServices.HasSave() ? _saveServices.Load() : null;
+
+            _businessFactory.CreateBusiness(index: 0, startLevel: 1, baseIncome: 3d, loadedData);
+            _businessFactory.CreateBusiness(index: 1, startLevel: 0, baseIncome: 40d, loadedData);
+            _businessFactory.CreateBusiness(index: 2, startLevel: 0, baseIncome: 200d, loadedData);
+            _businessFactory.CreateBusiness(index: 3, startLevel: 0, baseIncome: 1000d, loadedData);
+            _businessFactory.CreateBusiness(index: 4, startLevel: 0, baseIncome: 5000d, loadedData);
         }
 
         private void RefreshUi()
         {
-            _businessInformationPresenter?.RefreshData();
+            _balancePresenter?.UpdateBalancePlayer();
             _levelUpPresenter?.ShowPriceLevelUp();
+
+            _businessInformationPresenter?.RefreshLevel();
+            _businessInformationPresenter?.RefreshIncome();
+
+            _incomeUpgradePresenter?.ShowIncomeUpgrades();
+
+            _priceUpgradePresenter?.ShowPriceFirstUpgrade();
+            _priceUpgradePresenter?.ShowPriceSecondUpgrade();
         }
 
         private void BusinessNames()
@@ -112,7 +140,24 @@ namespace _Project.Scripts._Infrastructure
 
         private void SaveDataPlayer()
         {
-            PlayerSaveData playerSaveData = new PlayerSaveData(_balance.Amount);
+            PlayerSaveData playerSaveData = new PlayerSaveData(_balanceModel.Amount);
+
+            foreach (var entity in _businessFilter)
+            {
+                ref BusinessComponents business = ref _businessComponentsPool.Get(entity);
+
+                BusinessSaveData businessSaveData = new BusinessSaveData
+                {
+                    ID = business.ID,
+                    Level = business.Level,
+                    CurrentIncome = business.BaseIncome,
+                    FirstUpgradeIncome =  business.FirstUpgradeIncome,
+                    SecondUpgradeIncome =  business.SecondUpgradeIncome
+                };
+
+                playerSaveData.BusinessSave.Add(businessSaveData);
+            }
+
             _saveServices.Save(playerSaveData);
         }
     }

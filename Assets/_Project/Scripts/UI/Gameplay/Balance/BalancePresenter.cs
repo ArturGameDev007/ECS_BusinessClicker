@@ -5,15 +5,15 @@ namespace _Project.Scripts.UI.Gameplay.Balance
         private readonly BalanceView _balanceView;
         private readonly BalanceModel _balanceModel;
 
-        public BalancePresenter(BalanceView balanceView,  BalanceModel balanceModel)
+        public BalancePresenter(BalanceView balanceView, BalanceModel balanceModel)
         {
             _balanceView = balanceView;
             _balanceModel = balanceModel;
         }
         
-        public void UpdateBalancePlayer(double amount)
+        public void UpdateBalancePlayer()
         {
-            _balanceView.SetBalanceText(amount);
+            _balanceView.SetBalanceText(_balanceModel.Amount);
         }
     }
 }

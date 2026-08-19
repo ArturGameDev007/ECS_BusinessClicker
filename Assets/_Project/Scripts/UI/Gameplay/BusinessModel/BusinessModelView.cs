@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 
@@ -8,26 +9,35 @@ namespace _Project.Scripts.UI.Gameplay.BusinessModel
         [SerializeField] private TextMeshProUGUI[] _levelText;
         [SerializeField] private TextMeshProUGUI[] _incomeText;
 
-        public void SetLevel(int[] level)
+        public void SetLevel(int index, int level)
         {
-            if (_levelText ==  null)
+            if (_levelText == null || index < 0 || index >= _levelText.Length)
                 return;
 
-            for (int i = 0; i < _levelText.Length; i++)
-            {
-                _levelText[i].text = $"LVL\n{level[i]}";
-            }
+            _levelText[index].text = $"LVL\n{level}";
+
+            // int limit = Math.Min(_levelText.Length, level.Length);
+            //
+            // for (int i = 0; i < limit; i++)
+            // {
+            //     _levelText[i].text = $"LVL\n{level[i]}";
+            // }
         }
 
-        public void SetIncome(double[] income)
+        public void SetIncome(int index, double income)
         {
-            if (_incomeText ==  null)
+            if (_incomeText == null ||  index < 0 || index >= _incomeText.Length)
                 return;
+
+            _incomeText[index].text = $"Income\n{income}$";
             
-            for (int i = 0; i < _incomeText.Length; i++)
-            {
-                _incomeText[i].text = $"Income\n{income[i]}$";
-            }
+            //
+            // int limit = Math.Min(_incomeText.Length, income.Length);
+            //
+            // for (int i = 0; i < limit; i++)
+            // {
+            //     _incomeText[i].text = $"Income\n{income[i]}$";
+            // }
         }
     }
 }

@@ -12,4 +12,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 328aa1a1d5a6489d8d54f92ea67781ea, type: 3}
   m_Name: PriceLVLUp
   m_EditorClassIdentifier: 
-  <Price>k__BackingField: 0300000028000000c8000000e803000088130000
+  <Price>k__BackingField:
+  - 3
+  - 40
+  - 200
+  - 1000
+  - 5000

@@ -5,9 +5,12 @@ using _Project.Scripts.UI.Gameplay.Balance;
 using _Project.Scripts.UI.Gameplay.BarIncome;
 using _Project.Scripts.UI.Gameplay.BusinessModel;
 using _Project.Scripts.UI.Gameplay.ButtonLVLUp;
+using _Project.Scripts.UI.Gameplay.ButtonUpBaseIncome;
+using _Project.Scripts.UI.Gameplay.IncomeUpgrades;
 using _Project.Scripts.UI.Gameplay.NamesBusinessAndUpgrades;
 using Leopotam.EcsLite;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace _Project.Scripts._Infrastructure
 {
@@ -18,16 +21,21 @@ namespace _Project.Scripts._Infrastructure
         [SerializeField] private BusinessNamesConfig _businessNamesConfig;
         [SerializeField] private BarIncomeConfig _barIncomeConfig;
         [SerializeField] private UpgradeNamesConfig _upgradeNamesConfig;
-        [SerializeField] private BusinessInformationConfig _businessInformationConfig;
         [SerializeField] private PriceLevelUpConfig _levelUpConfig;
+        [SerializeField] private IncomeUpgradesConfig _incomeUpgradesConfig;
+        [SerializeField] private PriceUpgradesConfig _priceUpgradesConfig;
 
         [Header("Other")] 
         [SerializeField] private BusinessNameView _businessNameView;
+        [SerializeField] private ButtonLevelUpView _buttonLevelUpView;
         [SerializeField] private BarIncomeView _barIncomeView;
         [SerializeField] private UpgradeNamesView _upgradeNamesView;
         [SerializeField] private BalanceView _balanceView;
         [SerializeField] private BusinessModelView _businessModelView;
         [SerializeField] private PriceView _priceView;
+        [SerializeField] private IncomeUpgradeView _incomeUpgradeView;
+        [SerializeField] private ButtonUpIncomeView _buttonUpIncomeView;
+        [SerializeField] private PriceUpgradesView _priceUpgradesView;
 
         public EcsManager Compose()
         {
@@ -35,28 +43,31 @@ namespace _Project.Scripts._Infrastructure
             BusinessFactory businessFactory = new BusinessFactory(world, _barIncomeConfig);
             
             SaveServices saveServices = new SaveServices();
-            var startBalance = SaveServices(saveServices);
+            
+            double startBalance = SaveServices(saveServices);
+            
+            BalanceModel balanceModel = new BalanceModel(startBalance);
             
             BusinessNamePresenter namePresenter = new BusinessNamePresenter(_businessNameView);
-            UpgradeNamesPresenter upgradeNamesPresenter = new UpgradeNamesPresenter(_upgradeNamesView);
-            BalanceModel balanceModel = new BalanceModel(startBalance);
             BalancePresenter balancePresenter = new BalancePresenter(_balanceView, balanceModel);
-            BusinessInformationPresenter informationPresenter = new BusinessInformationPresenter(_businessModelView, _businessInformationConfig);
+            BusinessInformationPresenter informationPresenter = new BusinessInformationPresenter(world, _businessModelView);
+            ButtonLevelUpPresenter buttonLevelUpPresenter = new ButtonLevelUpPresenter(balancePresenter, informationPresenter, _buttonLevelUpView, balanceModel, _levelUpConfig, world);
+            UpgradeNamesPresenter upgradeNamesPresenter = new UpgradeNamesPresenter(_upgradeNamesView);
+            IncomeUpgradePresenter incomeUpgradePresenter = new IncomeUpgradePresenter(_incomeUpgradeView, _incomeUpgradesConfig);
             PriceLevelUpPresenter levelUpPresenter = new PriceLevelUpPresenter(_priceView, _levelUpConfig);
-            BarIncomeModel incomeModel = new BarIncomeModel();
+            PriceUpgradePresenter priceUpgradePresenter = new PriceUpgradePresenter(_priceUpgradesView, _priceUpgradesConfig);
+            ButtonUpIncomePresenter upIncomePresenter = new ButtonUpIncomePresenter(world, _buttonUpIncomeView, balanceModel, _priceUpgradesConfig, balancePresenter, priceUpgradePresenter, informationPresenter);
+            // BarIncomeModel incomeModel = new BarIncomeModel();
             BarIncomePresenter incomePresenter = new BarIncomePresenter(_barIncomeView);
-            // GenerationIncome generationIncome = new GenerationIncome(_barIncomeConfig, balanceModel, balancePresenter, incomePresenter, incomeModel);
 
-            return new EcsManager(world, businessFactory, _businessNamesConfig, _upgradeNamesConfig, _barIncomeConfig, namePresenter, upgradeNamesPresenter, informationPresenter, levelUpPresenter, incomePresenter, incomeModel, saveServices,
-                balancePresenter, balanceModel);
+            return new EcsManager(world, businessFactory, saveServices, _businessNamesConfig, _upgradeNamesConfig, namePresenter, buttonLevelUpPresenter, upgradeNamesPresenter, informationPresenter, levelUpPresenter, incomePresenter, incomeUpgradePresenter, upIncomePresenter, priceUpgradePresenter, balanceModel, balancePresenter);
         }
 
-        private float SaveServices(SaveServices saveServices)
+        private double SaveServices(SaveServices saveServices)
         {
-            float minValueBalance = 0f;
-
-            var loadBalance = saveServices.HasSave() ? saveServices.Load().Balance : minValueBalance;
-
+            double minValueBalance = 0f;
+            double loadBalance = saveServices.HasSave() ? saveServices.Load().Balance : minValueBalance;
+        
             return loadBalance;
         }
     }

@@ -1,14 +1,17 @@
 using System;
+using System.Collections.Generic;
 
 namespace _Project.Scripts._Services.Save
 {
     [Serializable]
     public class PlayerSaveData
     {
-        public float Balance { get; private set; }
+        public double Balance;
         // public BusinessSaveData[] BusinessSaveData;
 
-        public PlayerSaveData(float balance)
+        public List<BusinessSaveData> BusinessSave = new();
+
+        public PlayerSaveData(double balance)
         {
             Balance = balance;
         }

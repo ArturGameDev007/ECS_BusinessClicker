@@ -1,0 +1,38 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eccca00fc2bf45458cdfc2aae08dfeb9, type: 3}
+  m_Name: ButtonPriceUpgrades
+  m_EditorClassIdentifier: 
+  <PriceFirstUpgrade>k__BackingField:
+  - 50
+  - 1200
+  - 6000
+  - 15000
+  - 100000
+  <PriceSecondUpgrade>k__BackingField:
+  - 400
+  - 4000
+  - 20000
+  - 50000
+  - 500000
+  <PercentFirstUpgrade>k__BackingField:
+  - 0.5
+  - 1
+  - 1
+  - 1
+  - 2
+  <PercentSecondUpgrade>k__BackingField:
+  - 1
+  - 2
+  - 1.5
+  - 2
+  - 4

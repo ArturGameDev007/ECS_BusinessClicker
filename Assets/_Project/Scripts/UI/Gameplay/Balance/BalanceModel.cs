@@ -2,11 +2,11 @@ namespace _Project.Scripts.UI.Gameplay.Balance
 {
     public class BalanceModel
     {
-        public float Amount { get; set; }
+        public double Amount { get; set; }
 
         // private float value = 3f;
 
-        public BalanceModel(float amount)
+        public BalanceModel(double amount)
         {
             Amount = amount;
         }
@@ -17,9 +17,9 @@ namespace _Project.Scripts.UI.Gameplay.Balance
         // }
         //
         
-        public void AddAmountIncome(float value)
-        {
-            Amount += value;
-        }
+        // public void AddAmountIncome(float value)
+        // {
+        //     Amount += value;
+        // }
     }
 }

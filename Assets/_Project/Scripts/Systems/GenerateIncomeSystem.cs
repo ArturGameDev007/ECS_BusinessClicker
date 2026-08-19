@@ -9,58 +9,38 @@ namespace _Project.Scripts.Systems
     public sealed class GenerateIncomeSystem : IEcsInitSystem, IEcsRunSystem
     {
         private readonly BarIncomePresenter _barIncomePresenter;
-        private readonly BarIncomeModel _barIncomeModel;
-        private readonly BalanceModel _balanceModel;
         private readonly BalancePresenter _balancePresenter;
+        private readonly BalanceModel _balanceModel;
 
         private EcsFilter _playerFilter;
         private EcsFilter _businessFilter;
 
-        private EcsPool<PlayerBalanceComponent> _playerBalancePool;
         private EcsPool<BusinessComponents> _businessComponentsPool;
 
-        public GenerateIncomeSystem(BarIncomePresenter barIncomePresenter, BarIncomeModel barIncomeModel,
-            BalanceModel balanceModel, BalancePresenter balancePresenter)
+        public GenerateIncomeSystem(BarIncomePresenter barIncomePresenter, BalancePresenter balancePresenter, BalanceModel balanceModel)
         {
             _barIncomePresenter = barIncomePresenter;
-            _barIncomeModel = barIncomeModel;
-            _balanceModel = balanceModel;
             _balancePresenter = balancePresenter;
+            _balanceModel = balanceModel;
         }
 
         public void Init(IEcsSystems systems)
         {
             EcsWorld world = systems.GetWorld();
 
-            _playerFilter = world.Filter<PlayerBalanceComponent>().End();
             _businessFilter = world.Filter<BusinessComponents>().End();
-
-            _playerBalancePool = world.GetPool<PlayerBalanceComponent>();
             _businessComponentsPool = world.GetPool<BusinessComponents>();
         }
 
         public void Run(IEcsSystems systems)
         {
-            int playerEntity = -1;
-
-            foreach (int entity in _playerFilter)
-            {
-                playerEntity = entity;
-                break;
-            }
-
-            if (playerEntity == -1)
-                return;
-
-            ref PlayerBalanceComponent playerBalance = ref _playerBalancePool.Get(playerEntity);
-
             foreach (var businessEntity in _businessFilter)
             {
                 ref BusinessComponents business = ref _businessComponentsPool.Get(businessEntity);
 
                 if (business.Level <= 0)
                 {
-                    _barIncomePresenter?.RefreshBarSlider(business.ID, 0f,  business.MaxValueSlider);
+                    _barIncomePresenter?.RefreshBarSlider(business.ID, 0f, business.MaxValueSlider);
                     continue;
                 }
 
@@ -73,24 +53,21 @@ namespace _Project.Scripts.Systems
 
                 if (currentTimeProgress >= timer)
                 {
-                    bool isBarFull = _barIncomeModel.AddBarIncomeSlider(
-                        business.CurrentValueSlider, business.CountSliderStep, business.MaxValueSlider);
+                    business.CurrentValueSlider += business.CountSliderStep;
 
-                    business.CurrentValueSlider = _barIncomeModel.CurrentValue;
-
-                    playerBalance.Amount += business.FinalReward;
-                    _barIncomePresenter?.RefreshBarSlider(business.ID, business.CurrentValueSlider,  business.MaxValueSlider);
-
-                    business.CurrentTime -= timer;
-
-                    if (isBarFull)
+                    if (business.CurrentValueSlider >= business.MaxValueSlider)
                     {
-                        _balancePresenter?.UpdateBalancePlayer(playerBalance.Amount);
+                        _balanceModel.Amount += business.FinalReward;
+                        
                         business.CurrentValueSlider = 0f;
+                        
+                        _balancePresenter?.UpdateBalancePlayer();
                     }
-                }
 
-                // _barIncomePresenter?.RefreshBar();
+                    _barIncomePresenter?.RefreshBarSlider(business.ID, business.CurrentValueSlider, business.MaxValueSlider);
+                    
+                    business.CurrentTime -= timer;
+                }
             }
         }
 
