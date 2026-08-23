@@ -1,9 +1,7 @@
 using _Project.Scripts._Configs;
+using _Project.Scripts._Infrastructure.EcsCore;
 using _Project.Scripts._Services.Save;
-using _Project.Scripts.Components;
-using _Project.Scripts.Systems;
 using _Project.Scripts.UI.Gameplay.Balance;
-using _Project.Scripts.UI.Gameplay.BarIncome;
 using _Project.Scripts.UI.Gameplay.BusinessModel;
 using _Project.Scripts.UI.Gameplay.ButtonLVLUp;
 using _Project.Scripts.UI.Gameplay.ButtonUpBaseIncome;
@@ -13,7 +11,7 @@ using Leopotam.EcsLite;
 
 namespace _Project.Scripts._Infrastructure
 {
-    public class EcsManager
+    public class GameManager
     {
         private readonly EcsWorld _world;
         private readonly BusinessFactory _businessFactory;
@@ -27,29 +25,23 @@ namespace _Project.Scripts._Infrastructure
         private readonly UpgradeNamesPresenter _upgradeNamesPresenter;
         private readonly BusinessInformationPresenter _businessInformationPresenter;
         private readonly PriceLevelUpPresenter _levelUpPresenter;
-        private readonly BarIncomePresenter _barIncomePresenter;
         private readonly IncomeUpgradePresenter _incomeUpgradePresenter;
         private readonly ButtonUpIncomePresenter _buttonUpIncomePresenter;
         private readonly PriceUpgradePresenter _priceUpgradePresenter;
-        // private readonly BarIncomeModel _barIncomeModel;
-
-        private readonly BalanceModel _balanceModel;
-
         private readonly BalancePresenter _balancePresenter;
+        
+        private readonly EcsSystemManager _ecsSystemManager;
+        private readonly SaveData _saveData;
 
         private EcsSystems _systems;
-        private EcsFilter _businessFilter;
-        private EcsPool<BusinessComponents> _businessComponentsPool;
 
-        public EcsManager(EcsWorld world, BusinessFactory businessFactory, SaveServices saveServices,
-            BusinessNamesConfig businessNamesConfig,
-            UpgradeNamesConfig upgradeNamesConfig,
+        public GameManager(EcsWorld world, BusinessFactory businessFactory, SaveServices saveServices,
+            BusinessNamesConfig businessNamesConfig, UpgradeNamesConfig upgradeNamesConfig,
             BusinessNamePresenter businessNamePresenter, ButtonLevelUpPresenter buttonLevelUpPresenter,
             UpgradeNamesPresenter upgradeNamesPresenter, BusinessInformationPresenter businessInformationPresenter,
-            PriceLevelUpPresenter levelUpPresenter, BarIncomePresenter incomePresenter,
-            IncomeUpgradePresenter incomeUpgradePresenter, ButtonUpIncomePresenter buttonUpIncomePresenter,
-            PriceUpgradePresenter priceUpgradePresenter, BalanceModel balanceModel,
-            BalancePresenter balancePresenter)
+            PriceLevelUpPresenter levelUpPresenter, IncomeUpgradePresenter incomeUpgradePresenter,
+            ButtonUpIncomePresenter buttonUpIncomePresenter, PriceUpgradePresenter priceUpgradePresenter,
+            BalancePresenter balancePresenter, EcsSystemManager ecsSystemManager, SaveData saveData)
         {
             _world = world;
             _businessFactory = businessFactory;
@@ -61,28 +53,19 @@ namespace _Project.Scripts._Infrastructure
             _upgradeNamesPresenter = upgradeNamesPresenter;
             _businessInformationPresenter = businessInformationPresenter;
             _levelUpPresenter = levelUpPresenter;
-            _barIncomePresenter = incomePresenter;
             _incomeUpgradePresenter = incomeUpgradePresenter;
             _buttonUpIncomePresenter = buttonUpIncomePresenter;
             _priceUpgradePresenter = priceUpgradePresenter;
-            // _barIncomeModel = barIncomeModel;
-            _balanceModel = balanceModel;
             _balancePresenter = balancePresenter;
-
-            _businessFilter = _world.Filter<BusinessComponents>().End();
-            _businessComponentsPool = world.GetPool<BusinessComponents>();
+            _ecsSystemManager = ecsSystemManager;
+            _saveData = saveData;
         }
 
         public void Init()
         {
-            _systems = new EcsSystems(_world);
+            _ecsSystemManager?.Init();
 
             BusinessNames();
-
-            _systems
-                .Add(new GenerateIncomeSystem(_barIncomePresenter, _balancePresenter, _balanceModel))
-                .Init();
-
             CreateBusiness();
             RefreshUi();
 
@@ -94,16 +77,19 @@ namespace _Project.Scripts._Infrastructure
 
         public void Tick()
         {
-            _systems.Run();
+            _ecsSystemManager?.Tick();
         }
 
         public void Destroy()
         {
-            SaveDataPlayer();
+            _saveData?.SaveDataPlayer();
 
-            _world.Destroy();
+            _ecsSystemManager?.Destroy();
+
             _buttonLevelUpPresenter?.Destroy();
             _buttonUpIncomePresenter?.Destroy();
+
+            _world?.Destroy();
         }
 
         private void CreateBusiness()
@@ -134,31 +120,7 @@ namespace _Project.Scripts._Infrastructure
         private void BusinessNames()
         {
             _businessNamePresenter?.ShowBusinessName(_businessNamesConfig.Names);
-            _upgradeNamesPresenter?.ShowUpgradeNames(_upgradeNamesConfig.FirstUpgradeName,
-                _upgradeNamesConfig.SecondUpgradeName);
-        }
-
-        private void SaveDataPlayer()
-        {
-            PlayerSaveData playerSaveData = new PlayerSaveData(_balanceModel.Amount);
-
-            foreach (var entity in _businessFilter)
-            {
-                ref BusinessComponents business = ref _businessComponentsPool.Get(entity);
-
-                BusinessSaveData businessSaveData = new BusinessSaveData
-                {
-                    ID = business.ID,
-                    Level = business.Level,
-                    CurrentIncome = business.BaseIncome,
-                    FirstUpgradeIncome =  business.FirstUpgradeIncome,
-                    SecondUpgradeIncome =  business.SecondUpgradeIncome
-                };
-
-                playerSaveData.BusinessSave.Add(businessSaveData);
-            }
-
-            _saveServices.Save(playerSaveData);
+            _upgradeNamesPresenter?.ShowUpgradeNames(_upgradeNamesConfig.FirstUpgradeName, _upgradeNamesConfig.SecondUpgradeName);
         }
     }
 }

@@ -1,5 +1,6 @@
 using System;
 using _Project.Scripts._Configs;
+using _Project.Scripts._Infrastructure.EcsCore;
 using _Project.Scripts._Services.Save;
 using _Project.Scripts.UI.Gameplay.Balance;
 using _Project.Scripts.UI.Gameplay.BarIncome;
@@ -10,7 +11,6 @@ using _Project.Scripts.UI.Gameplay.IncomeUpgrades;
 using _Project.Scripts.UI.Gameplay.NamesBusinessAndUpgrades;
 using Leopotam.EcsLite;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace _Project.Scripts._Infrastructure
 {
@@ -25,7 +25,7 @@ namespace _Project.Scripts._Infrastructure
         [SerializeField] private IncomeUpgradesConfig _incomeUpgradesConfig;
         [SerializeField] private PriceUpgradesConfig _priceUpgradesConfig;
 
-        [Header("Other")] 
+        [Header("Views")] 
         [SerializeField] private BusinessNameView _businessNameView;
         [SerializeField] private ButtonLevelUpView _buttonLevelUpView;
         [SerializeField] private BarIncomeView _barIncomeView;
@@ -37,30 +37,31 @@ namespace _Project.Scripts._Infrastructure
         [SerializeField] private ButtonUpIncomeView _buttonUpIncomeView;
         [SerializeField] private PriceUpgradesView _priceUpgradesView;
 
-        public EcsManager Compose()
+        public GameManager Compose()
         {
             EcsWorld world = new EcsWorld();
             BusinessFactory businessFactory = new BusinessFactory(world, _barIncomeConfig);
-            
             SaveServices saveServices = new SaveServices();
             
             double startBalance = SaveServices(saveServices);
             
-            BalanceModel balanceModel = new BalanceModel(startBalance);
-            
             BusinessNamePresenter namePresenter = new BusinessNamePresenter(_businessNameView);
-            BalancePresenter balancePresenter = new BalancePresenter(_balanceView, balanceModel);
+            BalancePresenter balancePresenter = new BalancePresenter(world, _balanceView);
             BusinessInformationPresenter informationPresenter = new BusinessInformationPresenter(world, _businessModelView);
-            ButtonLevelUpPresenter buttonLevelUpPresenter = new ButtonLevelUpPresenter(balancePresenter, informationPresenter, _buttonLevelUpView, balanceModel, _levelUpConfig, world);
+            ButtonLevelUpPresenter buttonLevelUpPresenter = new ButtonLevelUpPresenter(balancePresenter, informationPresenter, _buttonLevelUpView, _levelUpConfig, world);
             UpgradeNamesPresenter upgradeNamesPresenter = new UpgradeNamesPresenter(_upgradeNamesView);
             IncomeUpgradePresenter incomeUpgradePresenter = new IncomeUpgradePresenter(_incomeUpgradeView, _incomeUpgradesConfig);
             PriceLevelUpPresenter levelUpPresenter = new PriceLevelUpPresenter(_priceView, _levelUpConfig);
             PriceUpgradePresenter priceUpgradePresenter = new PriceUpgradePresenter(_priceUpgradesView, _priceUpgradesConfig);
-            ButtonUpIncomePresenter upIncomePresenter = new ButtonUpIncomePresenter(world, _buttonUpIncomeView, balanceModel, _priceUpgradesConfig, balancePresenter, priceUpgradePresenter, informationPresenter);
-            // BarIncomeModel incomeModel = new BarIncomeModel();
+            ButtonUpIncomePresenter upIncomePresenter = new ButtonUpIncomePresenter(world, _buttonUpIncomeView, _priceUpgradesConfig, balancePresenter, priceUpgradePresenter, informationPresenter);
             BarIncomePresenter incomePresenter = new BarIncomePresenter(_barIncomeView);
 
-            return new EcsManager(world, businessFactory, saveServices, _businessNamesConfig, _upgradeNamesConfig, namePresenter, buttonLevelUpPresenter, upgradeNamesPresenter, informationPresenter, levelUpPresenter, incomePresenter, incomeUpgradePresenter, upIncomePresenter, priceUpgradePresenter, balanceModel, balancePresenter);
+            EcsSystemManager ecsSystemManager = new EcsSystemManager(world, balancePresenter, incomePresenter, startBalance);
+            SaveData saveData = new SaveData(world, saveServices);
+            
+            return new GameManager(world, businessFactory, saveServices, _businessNamesConfig, _upgradeNamesConfig, 
+                namePresenter, buttonLevelUpPresenter, upgradeNamesPresenter, informationPresenter, levelUpPresenter, 
+                incomeUpgradePresenter, upIncomePresenter, priceUpgradePresenter, balancePresenter, ecsSystemManager, saveData);
         }
 
         private double SaveServices(SaveServices saveServices)

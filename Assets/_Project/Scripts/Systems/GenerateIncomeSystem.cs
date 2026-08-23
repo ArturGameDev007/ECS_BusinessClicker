@@ -10,18 +10,17 @@ namespace _Project.Scripts.Systems
     {
         private readonly BarIncomePresenter _barIncomePresenter;
         private readonly BalancePresenter _balancePresenter;
-        private readonly BalanceModel _balanceModel;
 
         private EcsFilter _playerFilter;
         private EcsFilter _businessFilter;
 
         private EcsPool<BusinessComponents> _businessComponentsPool;
+        private EcsPool<PlayerBalanceComponent> _balanceComponentsPool;
 
-        public GenerateIncomeSystem(BarIncomePresenter barIncomePresenter, BalancePresenter balancePresenter, BalanceModel balanceModel)
+        public GenerateIncomeSystem(BarIncomePresenter barIncomePresenter, BalancePresenter balancePresenter)
         {
             _barIncomePresenter = barIncomePresenter;
             _balancePresenter = balancePresenter;
-            _balanceModel = balanceModel;
         }
 
         public void Init(IEcsSystems systems)
@@ -30,10 +29,19 @@ namespace _Project.Scripts.Systems
 
             _businessFilter = world.Filter<BusinessComponents>().End();
             _businessComponentsPool = world.GetPool<BusinessComponents>();
+
+            _playerFilter = world.Filter<PlayerBalanceComponent>().End();
+            _balanceComponentsPool = world.GetPool<PlayerBalanceComponent>();
         }
 
         public void Run(IEcsSystems systems)
         {
+            if (_playerFilter.GetEntitiesCount() <=0)
+                return;
+
+            int playerEntity = _playerFilter.GetRawEntities()[0];
+            ref PlayerBalanceComponent balance =  ref _balanceComponentsPool.Get(playerEntity);
+            
             foreach (var businessEntity in _businessFilter)
             {
                 ref BusinessComponents business = ref _businessComponentsPool.Get(businessEntity);
@@ -50,22 +58,22 @@ namespace _Project.Scripts.Systems
 
                 float currentTimeProgress = business.CurrentTime;
                 float timer = business.IncomeDuration;
-
+                
                 if (currentTimeProgress >= timer)
                 {
                     business.CurrentValueSlider += business.CountSliderStep;
 
                     if (business.CurrentValueSlider >= business.MaxValueSlider)
                     {
-                        _balanceModel.Amount += business.FinalReward;
-                        
                         business.CurrentValueSlider = 0f;
+                        balance.Amount += business.FinalReward;
                         
                         _balancePresenter?.UpdateBalancePlayer();
                     }
 
-                    _barIncomePresenter?.RefreshBarSlider(business.ID, business.CurrentValueSlider, business.MaxValueSlider);
-                    
+                    _barIncomePresenter?.RefreshBarSlider(business.ID, business.CurrentValueSlider,
+                        business.MaxValueSlider);
+
                     business.CurrentTime -= timer;
                 }
             }

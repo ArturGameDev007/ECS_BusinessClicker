@@ -3,7 +3,6 @@ using _Project.Scripts.Components;
 using _Project.Scripts.UI.Gameplay.Balance;
 using _Project.Scripts.UI.Gameplay.BusinessModel;
 using Leopotam.EcsLite;
-using UnityEngine;
 
 namespace _Project.Scripts.UI.Gameplay.ButtonLVLUp
 {
@@ -12,26 +11,31 @@ namespace _Project.Scripts.UI.Gameplay.ButtonLVLUp
         private readonly BalancePresenter _balancePresenter;
         private readonly BusinessInformationPresenter _businessInformationPresenter;
         private readonly ButtonLevelUpView _view;
-        private readonly BalanceModel _balanceModel;
         private readonly PriceLevelUpConfig _priceLevelUpConfig;
         private readonly EcsWorld _world;
 
         private EcsFilter _businessFilter;
+        private EcsFilter _balanceFilter;
+
         private EcsPool<BusinessComponents> _businessComponents;
+        private EcsPool<PlayerBalanceComponent> _playerBalanceComponents;
 
         public ButtonLevelUpPresenter(BalancePresenter balancePresenter,
-            BusinessInformationPresenter informationPresenter, ButtonLevelUpView view, BalanceModel balanceModel,
+            BusinessInformationPresenter informationPresenter, ButtonLevelUpView view,
             PriceLevelUpConfig priceLevelUpConfig, EcsWorld world)
         {
             _balancePresenter = balancePresenter;
             _businessInformationPresenter = informationPresenter;
             _view = view;
-            _balanceModel = balanceModel;
             _priceLevelUpConfig = priceLevelUpConfig;
 
             _world = world;
+            
             _businessFilter = _world.Filter<BusinessComponents>().End();
             _businessComponents = _world.GetPool<BusinessComponents>();
+            
+            _balanceFilter = _world.Filter<PlayerBalanceComponent>().End();
+            _playerBalanceComponents = _world.GetPool<PlayerBalanceComponent>();
         }
 
         public void Init()
@@ -69,67 +73,33 @@ namespace _Project.Scripts.UI.Gameplay.ButtonLVLUp
             CheckBuyClick(index);
         }
 
-        // private void CheckBuyClick(int index)
-        // {
-        //     if (_world == null || _businessFilter.GetEntitiesCount() <= 0)
-        //         return;
-        //     
-        //     if (index < 0 || index >= _businessFilter.GetEntitiesCount())
-        //         return;
-        //
-        //     if (_businessFilter.GetEntitiesCount() <= 0)
-        //         return;
-        //
-        //     int entityId = _businessFilter.GetRawEntities()[index];
-        //
-        //     ref BusinessComponents business = ref _businessComponents.Get(entityId);
-        //
-        //
-        //     double priceLevel = _priceLevelUpConfig.Price[index];
-        //
-        //     if (_balanceModel.Amount >= priceLevel)
-        //     {
-        //         _balanceModel.Amount -= priceLevel;
-        //         business.Level++;
-        //
-        //         _businessInformationPresenter?.RefreshLevel();
-        //         _balancePresenter?.UpdateBalancePlayer();
-        //
-        //         Debug.Log($"Куплен новый уровень. Списано {priceLevel}");
-        //     }
-        //     else
-        //     {
-        //         Debug.Log("У вас недостаточно средст для покупки.");
-        //     }
-        // }
-
         private void CheckBuyClick(int index)
         {
             if (_world == null)
                 return;
-        
+            
+            if (_balanceFilter.GetEntitiesCount() <= 0)
+                return;
+            
+            int playerEntity = _balanceFilter.GetRawEntities()[0];
+            ref PlayerBalanceComponent balance = ref _playerBalanceComponents.Get(playerEntity);
+
             foreach (var entity in _businessFilter)
             {
                 ref BusinessComponents business = ref _businessComponents.Get(entity);
-        
+
                 if (business.ID == index)
                 {
                     double priceLevel = _priceLevelUpConfig.Price[index];
-        
-                    if (_balanceModel.Amount >= priceLevel)
+                    
+                    if (balance.Amount >= priceLevel)
                     {
-                        _balanceModel.Amount -= priceLevel;
+                        balance.Amount -= priceLevel;
                         business.Level++;
-        
+
                         _businessInformationPresenter?.RefreshLevel();
                         _businessInformationPresenter?.RefreshIncome();
                         _balancePresenter?.UpdateBalancePlayer();
-        
-                        Debug.Log($"Куплен новый уровень. Списано {priceLevel}");
-                    }
-                    else
-                    {
-                        Debug.Log("У вас недостаточно средст для покупки.");
                     }
                 }
             }

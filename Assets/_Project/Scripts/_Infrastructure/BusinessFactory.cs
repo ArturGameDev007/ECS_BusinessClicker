@@ -28,12 +28,11 @@ namespace _Project.Scripts._Infrastructure
 
             if (loadedData != null)
             {
-                for (int i = 0; i < loadedData.BusinessSave.Count; i++)
+                foreach (var business in loadedData.BusinessSave)
                 {
-                    if (loadedData.BusinessSave[i].ID == index)
+                    if (business != null && business.ID == index)
                     {
-                        savedBusiness = loadedData.BusinessSave[i];
-                        break;
+                        savedBusiness = business;
                     }
                 }
             }

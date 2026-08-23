@@ -3,7 +3,6 @@ using _Project.Scripts.Components;
 using _Project.Scripts.UI.Gameplay.Balance;
 using _Project.Scripts.UI.Gameplay.BusinessModel;
 using Leopotam.EcsLite;
-using UnityEngine;
 
 namespace _Project.Scripts.UI.Gameplay.ButtonUpBaseIncome
 {
@@ -11,25 +10,26 @@ namespace _Project.Scripts.UI.Gameplay.ButtonUpBaseIncome
     {
         private readonly EcsWorld _world;
         private readonly ButtonUpIncomeView _buttonUpIncomeView;
-        private readonly BalanceModel _balanceModel;
         private readonly PriceUpgradesConfig _priceUpgradesConfig;
         private readonly BalancePresenter _balancePresenter;
         private readonly PriceUpgradePresenter _priceUpgradePresenter;
         private readonly BusinessInformationPresenter _businessInformationPresenter;
 
         private EcsFilter _businessFilter;
+        private EcsFilter _balanceFilter;
+
         private EcsPool<BusinessComponents> _businessComponents;
+        private EcsPool<PlayerBalanceComponent> _playerBalanceComponents;
 
         private bool _isPurchased;
 
-        public ButtonUpIncomePresenter(EcsWorld world, ButtonUpIncomeView buttonUpIncomeView, BalanceModel balanceModel,
+        public ButtonUpIncomePresenter(EcsWorld world, ButtonUpIncomeView buttonUpIncomeView,
             PriceUpgradesConfig priceUpgradesConfig, BalancePresenter balancePresenter,
             PriceUpgradePresenter priceUpgradePresenter,
             BusinessInformationPresenter businessInformationPresenter)
         {
             _world = world;
             _buttonUpIncomeView = buttonUpIncomeView;
-            _balanceModel = balanceModel;
             _priceUpgradesConfig = priceUpgradesConfig;
             _balancePresenter = balancePresenter;
             _priceUpgradePresenter = priceUpgradePresenter;
@@ -37,6 +37,9 @@ namespace _Project.Scripts.UI.Gameplay.ButtonUpBaseIncome
 
             _businessFilter = _world.Filter<BusinessComponents>().End();
             _businessComponents = _world.GetPool<BusinessComponents>();
+
+            _balanceFilter = _world.Filter<PlayerBalanceComponent>().End();
+            _playerBalanceComponents = _world.GetPool<PlayerBalanceComponent>();
         }
 
         public void Init()
@@ -107,36 +110,26 @@ namespace _Project.Scripts.UI.Gameplay.ButtonUpBaseIncome
         {
             if (_world == null)
                 return;
-
+            
+            if (_balanceFilter.GetEntitiesCount() <= 0)
+                return;
+            
+            int playerEntity = _balanceFilter.GetRawEntities()[0];
+            ref PlayerBalanceComponent balance = ref _playerBalanceComponents.Get(playerEntity);
+            
             foreach (var entity in _businessFilter)
             {
                 ref BusinessComponents business = ref _businessComponents.Get(entity);
-
+            
                 if (business.ID == index)
                 {
                     double priceUpgrade = _priceUpgradesConfig.PriceFirstUpgrade[index];
                     double upgradePercent = _priceUpgradesConfig.PercentFirstUpgrade[index];
-
-                    if (_balanceModel.Amount >= priceUpgrade)
-                    {
-                        _isPurchased = true;
-
-                        _balanceModel.Amount -= priceUpgrade;
-
-                        business.FirstUpgradeIncome = upgradePercent;
-                        business.BaseIncome *= upgradePercent + 1;
-
-                        _businessInformationPresenter?.RefreshIncome();
-                        _balancePresenter?.UpdateBalancePlayer();
-                        _priceUpgradePresenter?.ShowMessageForFirstUpgrade(business.ID);
-
-                        _buttonUpIncomeView.ButtonFirstUpgrade[index].interactable = false;
-                    }
+            
+                    if (balance.Amount >= priceUpgrade)
+                        BuyIncomeUpgrades(ref business, ref balance, priceUpgrade, upgradePercent, index, isFirstUpgrade: true);
                     else
-                    {
                         _isPurchased = false;
-                        Debug.Log("У вас недостаточно средств для улучшения бизнеса.");
-                    }
                 }
             }
         }
@@ -145,37 +138,53 @@ namespace _Project.Scripts.UI.Gameplay.ButtonUpBaseIncome
         {
             if (_world == null)
                 return;
-
+            
+            if (_balanceFilter.GetEntitiesCount() <= 0)
+                return;
+            
+            int playerEntity = _balanceFilter.GetRawEntities()[0];
+            ref PlayerBalanceComponent balance = ref _playerBalanceComponents.Get(playerEntity);
+            
             foreach (var entity in _businessFilter)
             {
                 ref BusinessComponents business = ref _businessComponents.Get(entity);
-
+            
                 if (business.ID == index)
                 {
                     double priceUpgrade = _priceUpgradesConfig.PriceSecondUpgrade[index];
                     double upgradePercent = _priceUpgradesConfig.PercentSecondUpgrade[index];
-
-                    if (_balanceModel.Amount >= priceUpgrade)
-                    {
-                        _isPurchased = true;
-
-                        _balanceModel.Amount -= priceUpgrade;
-
-                        business.SecondUpgradeIncome = upgradePercent;
-                        business.BaseIncome *= upgradePercent + 1;
-
-                        _businessInformationPresenter?.RefreshIncome();
-                        _balancePresenter?.UpdateBalancePlayer();
-                        _priceUpgradePresenter?.ShowMessageForSecondUpgrade(business.ID);
-
-                        _buttonUpIncomeView.ButtonSecondUpgrade[index].interactable = false;
-                    }
+            
+                    if (balance.Amount >= priceUpgrade)
+                        BuyIncomeUpgrades(ref business, ref balance, priceUpgrade, upgradePercent, index, isFirstUpgrade: false);
                     else
-                    {
-                        Debug.Log("У вас недостаточно средств для улучшения бизнеса.");
-                    }
+                        _isPurchased = false;
                 }
             }
+        }
+        
+        private void BuyIncomeUpgrades(ref BusinessComponents business, ref PlayerBalanceComponent balance, double priceUpgrade, double upgradePercent, int index, bool isFirstUpgrade)
+        {
+            if (_isPurchased)
+                return;
+
+            balance.Amount -= priceUpgrade;
+            business.BaseIncome *= upgradePercent + 1;
+
+            if (isFirstUpgrade)
+            {
+                business.FirstUpgradeIncome = upgradePercent;
+                _priceUpgradePresenter?.ShowMessageForFirstUpgrade(business.ID);
+                _buttonUpIncomeView.ButtonFirstUpgrade[index].interactable = false;
+            }
+            else
+            {
+                business.SecondUpgradeIncome = upgradePercent;
+                _priceUpgradePresenter?.ShowMessageForSecondUpgrade(business.ID);
+                _buttonUpIncomeView.ButtonSecondUpgrade[index].interactable = false;
+            }
+
+            _businessInformationPresenter?.RefreshIncome();
+            _balancePresenter?.UpdateBalancePlayer();
         }
     }
 }

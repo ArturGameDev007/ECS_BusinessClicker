@@ -6,26 +6,26 @@ namespace _Project.Scripts._Infrastructure
     {
         [SerializeField] private GameplayCompositionRoot _gameplayCompositionRoot;
         
-        private EcsManager  _ecsManager;
+        private GameManager  _gameManager;
 
         private void Awake()
         {
-            _ecsManager = _gameplayCompositionRoot.Compose();
+            _gameManager = _gameplayCompositionRoot.Compose();
         }
 
         private void Start()
         {
-            _ecsManager?.Init();
+            _gameManager?.Init();
         }
 
         private void Update()
         {
-            _ecsManager?.Tick();
+            _gameManager?.Tick();
         }
 
         private void OnDestroy()
         {
-            _ecsManager?.Destroy();
+            _gameManager?.Destroy();
         }
     }
 }

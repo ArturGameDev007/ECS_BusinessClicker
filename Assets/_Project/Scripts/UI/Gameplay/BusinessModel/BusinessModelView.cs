@@ -15,13 +15,6 @@ namespace _Project.Scripts.UI.Gameplay.BusinessModel
                 return;
 
             _levelText[index].text = $"LVL\n{level}";
-
-            // int limit = Math.Min(_levelText.Length, level.Length);
-            //
-            // for (int i = 0; i < limit; i++)
-            // {
-            //     _levelText[i].text = $"LVL\n{level[i]}";
-            // }
         }
 
         public void SetIncome(int index, double income)
@@ -30,14 +23,6 @@ namespace _Project.Scripts.UI.Gameplay.BusinessModel
                 return;
 
             _incomeText[index].text = $"Income\n{income}$";
-            
-            //
-            // int limit = Math.Min(_incomeText.Length, income.Length);
-            //
-            // for (int i = 0; i < limit; i++)
-            // {
-            //     _incomeText[i].text = $"Income\n{income[i]}$";
-            // }
         }
     }
 }

@@ -7,7 +7,6 @@ namespace _Project.Scripts._Services.Save
     public class PlayerSaveData
     {
         public double Balance;
-        // public BusinessSaveData[] BusinessSaveData;
 
         public List<BusinessSaveData> BusinessSave = new();
 

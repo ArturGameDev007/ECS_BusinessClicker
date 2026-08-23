@@ -1,4 +1,3 @@
-using _Project.Scripts.UI.Gameplay.BarIncome;
 using UnityEngine;
 
 namespace _Project.Scripts.Components
@@ -13,6 +12,7 @@ namespace _Project.Scripts.Components
         public float CurrentTime;
         public float CountSliderStep;
 
+        [Header("Basic Settings")]
         public int Level;
         public double BaseIncome;
         
