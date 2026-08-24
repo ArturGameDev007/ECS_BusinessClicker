@@ -14,7 +14,9 @@ namespace _Project.Scripts.Systems
         private EcsFilter _playerFilter;
         private EcsFilter _businessFilter;
 
-        private EcsPool<BusinessComponents> _businessComponentsPool;
+        private EcsPool<BusinessIdComponent> _idPool;
+        private EcsPool<BusinessProgressComponent> _progressPool;
+        private EcsPool<BusinessEconomyComponent> _economyPool;
         private EcsPool<PlayerBalanceComponent> _balanceComponentsPool;
 
         public GenerateIncomeSystem(BarIncomePresenter barIncomePresenter, BalancePresenter balancePresenter)
@@ -27,8 +29,13 @@ namespace _Project.Scripts.Systems
         {
             EcsWorld world = systems.GetWorld();
 
-            _businessFilter = world.Filter<BusinessComponents>().End();
-            _businessComponentsPool = world.GetPool<BusinessComponents>();
+            _businessFilter = world.Filter<BusinessIdComponent>()
+                .Inc<BusinessProgressComponent>()
+                .Inc<BusinessEconomyComponent>().End();
+
+            _idPool = world.GetPool<BusinessIdComponent>();
+            _progressPool = world.GetPool<BusinessProgressComponent>();
+            _economyPool = world.GetPool<BusinessEconomyComponent>();
 
             _playerFilter = world.Filter<PlayerBalanceComponent>().End();
             _balanceComponentsPool = world.GetPool<PlayerBalanceComponent>();
@@ -36,54 +43,56 @@ namespace _Project.Scripts.Systems
 
         public void Run(IEcsSystems systems)
         {
-            if (_playerFilter.GetEntitiesCount() <=0)
+            if (_playerFilter.GetEntitiesCount() <= 0)
                 return;
 
             int playerEntity = _playerFilter.GetRawEntities()[0];
-            ref PlayerBalanceComponent balance =  ref _balanceComponentsPool.Get(playerEntity);
-            
+            ref PlayerBalanceComponent balance = ref _balanceComponentsPool.Get(playerEntity);
+
             foreach (var businessEntity in _businessFilter)
             {
-                ref BusinessComponents business = ref _businessComponentsPool.Get(businessEntity);
+                ref BusinessIdComponent idComponent = ref _idPool.Get(businessEntity);
+                ref BusinessProgressComponent progressComponent = ref _progressPool.Get(businessEntity);
+                ref BusinessEconomyComponent economyComponent = ref _economyPool.Get(businessEntity);
 
-                if (business.Level <= 0)
+                if (economyComponent.Level <= 0)
                 {
-                    _barIncomePresenter?.RefreshBarSlider(business.ID, 0f, business.MaxValueSlider);
+                    _barIncomePresenter?.RefreshBarSlider(idComponent.ID, 0f, progressComponent.MaxValueSlider);
                     continue;
                 }
 
-                CalculateBusinessIncome(ref business);
+                CalculateBusinessIncome(ref economyComponent);
 
-                business.CurrentTime += Time.deltaTime;
+                progressComponent.CurrentTime += Time.deltaTime;
 
-                float currentTimeProgress = business.CurrentTime;
-                float timer = business.IncomeDuration;
-                
+                float currentTimeProgress = progressComponent.CurrentTime;
+                float timer = progressComponent.IncomeDuration;
+
                 if (currentTimeProgress >= timer)
                 {
-                    business.CurrentValueSlider += business.CountSliderStep;
+                    progressComponent.CurrentValueSlider += progressComponent.CountSliderStep;
 
-                    if (business.CurrentValueSlider >= business.MaxValueSlider)
+                    if (progressComponent.CurrentValueSlider >= progressComponent.MaxValueSlider)
                     {
-                        business.CurrentValueSlider = 0f;
-                        balance.Amount += business.FinalReward;
-                        
+                        progressComponent.CurrentValueSlider = 0f;
+                        balance.Amount += economyComponent.FinalReward;
+
                         _balancePresenter?.UpdateBalancePlayer();
                     }
 
-                    _barIncomePresenter?.RefreshBarSlider(business.ID, business.CurrentValueSlider,
-                        business.MaxValueSlider);
+                    _barIncomePresenter?.RefreshBarSlider(idComponent.ID, progressComponent.CurrentValueSlider,
+                        progressComponent.MaxValueSlider);
 
-                    business.CurrentTime -= timer;
+                    progressComponent.CurrentTime -= timer;
                 }
             }
         }
 
-        private void CalculateBusinessIncome(ref BusinessComponents businessComponents)
+        private void CalculateBusinessIncome(ref BusinessEconomyComponent economyComponent)
         {
-            businessComponents.FinalReward =
-                businessComponents.Level * businessComponents.BaseIncome * (
-                    1.0d + businessComponents.FirstUpgradeIncome + businessComponents.SecondUpgradeIncome);
+            economyComponent.FinalReward =
+                economyComponent.Level * economyComponent.BaseIncome * (
+                    1.0d + economyComponent.FirstUpgradeIncome + economyComponent.SecondUpgradeIncome);
         }
     }
 }

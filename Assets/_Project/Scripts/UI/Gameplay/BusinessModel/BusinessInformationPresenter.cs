@@ -6,19 +6,23 @@ namespace _Project.Scripts.UI.Gameplay.BusinessModel
 {
     public class BusinessInformationPresenter
     {
-        private readonly EcsWorld  _world;
-        private readonly EcsFilter _businessFilter;
-        private readonly EcsPool<BusinessComponents> _businessComponents;
-        
-        private readonly BusinessModelView  _businessModelView;
+        private readonly EcsWorld _world;
+        private readonly BusinessModelView _businessModelView;
+
+        private EcsFilter _businessFilter;
+
+        private EcsPool<BusinessIdComponent> _idPool;
+        private EcsPool<BusinessEconomyComponent> _economyPool;
 
         public BusinessInformationPresenter(EcsWorld world, BusinessModelView businessModelView)
         {
             _world = world;
-            _businessFilter = _world.Filter<BusinessComponents>().End();
-            _businessComponents = _world.GetPool<BusinessComponents>();
-            
             _businessModelView = businessModelView;
+
+            _businessFilter = _world.Filter<BusinessIdComponent>().Inc<BusinessEconomyComponent>().End();
+
+            _idPool = _world.GetPool<BusinessIdComponent>();
+            _economyPool = _world.GetPool<BusinessEconomyComponent>();
         }
 
         public void RefreshLevel()
@@ -28,9 +32,10 @@ namespace _Project.Scripts.UI.Gameplay.BusinessModel
 
             foreach (var entity in _businessFilter)
             {
-                ref BusinessComponents business = ref _businessComponents.Get(entity);
-                
-                _businessModelView?.SetLevel(business.ID, business.Level);
+                ref BusinessIdComponent idComponent = ref _idPool.Get(entity);
+                ref BusinessEconomyComponent economyComponent = ref _economyPool.Get(entity);
+
+                _businessModelView?.SetLevel(idComponent.ID, economyComponent.Level);
             }
         }
 
@@ -38,12 +43,13 @@ namespace _Project.Scripts.UI.Gameplay.BusinessModel
         {
             if (_world == null)
                 return;
-            
+
             foreach (var entity in _businessFilter)
             {
-                ref BusinessComponents business = ref _businessComponents.Get(entity);
-                
-                _businessModelView?.SetIncome(business.ID, business.BaseIncome);
+                ref BusinessIdComponent idComponent = ref _idPool.Get(entity);
+                ref BusinessEconomyComponent economyComponent = ref _economyPool.Get(entity);
+
+                _businessModelView?.SetIncome(idComponent.ID, economyComponent.BaseIncome);
             }
         }
     }

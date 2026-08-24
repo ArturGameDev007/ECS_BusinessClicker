@@ -19,10 +19,14 @@ namespace _Project.Scripts._Infrastructure
         public void CreateBusiness(int index, int startLevel, double baseIncome, PlayerSaveData loadedData)
         {
             int businessEntity = _world.NewEntity();
-            
-            EcsPool<BusinessComponents> businessPool = _world.GetPool<BusinessComponents>();
-            
-            ref BusinessComponents businessComponent = ref businessPool.Add(businessEntity);
+
+            EcsPool<BusinessIdComponent> idPool = _world.GetPool<BusinessIdComponent>();
+            EcsPool<BusinessProgressComponent> progressPool = _world.GetPool<BusinessProgressComponent>();
+            EcsPool<BusinessEconomyComponent> economyPool = _world.GetPool<BusinessEconomyComponent>();
+
+            ref BusinessIdComponent idComponent = ref idPool.Add(businessEntity);
+            ref BusinessProgressComponent progressComponent = ref progressPool.Add(businessEntity);
+            ref BusinessEconomyComponent economyComponent = ref economyPool.Add(businessEntity);
 
             BusinessSaveData savedBusiness = null;
 
@@ -39,32 +43,32 @@ namespace _Project.Scripts._Infrastructure
 
             if (savedBusiness != null)
             {
-                businessComponent.Level = savedBusiness.Level;
-                businessComponent.BaseIncome = savedBusiness.CurrentIncome;
-                businessComponent.FirstUpgradeIncome = savedBusiness.FirstUpgradeIncome;
-                businessComponent.SecondUpgradeIncome = savedBusiness.SecondUpgradeIncome;
+                economyComponent.Level = savedBusiness.Level;
+                economyComponent.BaseIncome = savedBusiness.CurrentIncome;
+                economyComponent.FirstUpgradeIncome = savedBusiness.FirstUpgradeIncome;
+                economyComponent.SecondUpgradeIncome = savedBusiness.SecondUpgradeIncome;
             }
             else
             {
-                businessComponent.Level = startLevel;
-                businessComponent.BaseIncome = baseIncome;
-                businessComponent.FirstUpgradeIncome = 0d;
-                businessComponent.SecondUpgradeIncome = 0d;
+                economyComponent.Level = startLevel;
+                economyComponent.BaseIncome = baseIncome;
+                economyComponent.FirstUpgradeIncome = 0d;
+                economyComponent.SecondUpgradeIncome = 0d;
             }
 
-            businessComponent.ID = index;
+            idComponent.ID = index;
 
-            businessComponent.FinalReward = 0f;
+            economyComponent.FinalReward = 0f;
 
-            businessComponent.CurrentValueSlider = 0f;
-            businessComponent.MaxValueSlider = 100f;
+            progressComponent.CurrentValueSlider = 0f;
+            progressComponent.MaxValueSlider = 100f;
 
-            businessComponent.CountSliderStep = 20f;
+            progressComponent.CountSliderStep = 20f;
 
-            businessComponent.CurrentTime = 0f;
+            progressComponent.CurrentTime = 0f;
 
             if (index >= 0 && index < _barIncomeConfig.IncomeDuration.Length)
-                businessComponent.IncomeDuration = _barIncomeConfig.IncomeDuration[index];
+                progressComponent.IncomeDuration = _barIncomeConfig.IncomeDuration[index];
         }
     }
 }

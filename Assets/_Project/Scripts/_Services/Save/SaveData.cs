@@ -12,7 +12,8 @@ namespace _Project.Scripts._Services.Save
         private EcsFilter _businessFilter;
         private EcsFilter _balanceFilter;
 
-        private EcsPool<BusinessComponents> _businessComponentsPool;
+        private EcsPool<BusinessIdComponent> _idPool;
+        private EcsPool<BusinessEconomyComponent> _economyPool;
         private EcsPool<PlayerBalanceComponent> _playerBalancePool;
 
         public SaveData(EcsWorld world, SaveServices saveServices)
@@ -20,8 +21,10 @@ namespace _Project.Scripts._Services.Save
             _world = world;
             _saveServices = saveServices;
 
-            _businessFilter = _world.Filter<BusinessComponents>().End();
-            _businessComponentsPool = _world.GetPool<BusinessComponents>();
+            _businessFilter = world.Filter<BusinessIdComponent>().Inc<BusinessEconomyComponent>().End();
+            
+            _idPool = world.GetPool<BusinessIdComponent>();
+            _economyPool = world.GetPool<BusinessEconomyComponent>();
 
             _balanceFilter = _world.Filter<PlayerBalanceComponent>().End();
             _playerBalancePool = _world.GetPool<PlayerBalanceComponent>();
@@ -36,20 +39,21 @@ namespace _Project.Scripts._Services.Save
             int playerEntity = players;
 
             ref PlayerBalanceComponent balance = ref _playerBalancePool.Get(playerEntity);
-            
+
             PlayerSaveData playerSaveData = new PlayerSaveData(balance.Amount);
 
             foreach (var entity in _businessFilter)
             {
-                ref BusinessComponents business = ref _businessComponentsPool.Get(entity);
-
+                ref BusinessIdComponent idComponent = ref _idPool.Get(entity);
+                ref BusinessEconomyComponent economyComponent = ref _economyPool.Get(entity);
+                
                 BusinessSaveData businessSaveData = new BusinessSaveData
                 (
-                    business.ID,
-                    business.Level,
-                    business.BaseIncome,
-                    business.FirstUpgradeIncome,
-                    business.SecondUpgradeIncome
+                    idComponent.ID,
+                    economyComponent.Level,
+                    economyComponent.BaseIncome,
+                    economyComponent.FirstUpgradeIncome,
+                    economyComponent.SecondUpgradeIncome
                 );
 
                 playerSaveData.BusinessSave.Add(businessSaveData);

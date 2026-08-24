@@ -17,7 +17,8 @@ namespace _Project.Scripts.UI.Gameplay.ButtonLVLUp
         private EcsFilter _businessFilter;
         private EcsFilter _balanceFilter;
 
-        private EcsPool<BusinessComponents> _businessComponents;
+        private EcsPool<BusinessIdComponent> _idPool;
+        private EcsPool<BusinessEconomyComponent> _economyPool;
         private EcsPool<PlayerBalanceComponent> _playerBalanceComponents;
 
         public ButtonLevelUpPresenter(BalancePresenter balancePresenter,
@@ -30,9 +31,11 @@ namespace _Project.Scripts.UI.Gameplay.ButtonLVLUp
             _priceLevelUpConfig = priceLevelUpConfig;
 
             _world = world;
+
+            _businessFilter = _world.Filter<BusinessIdComponent>().Inc<BusinessEconomyComponent>().End();
             
-            _businessFilter = _world.Filter<BusinessComponents>().End();
-            _businessComponents = _world.GetPool<BusinessComponents>();
+            _idPool = _world.GetPool<BusinessIdComponent>();
+            _economyPool = _world.GetPool<BusinessEconomyComponent>();
             
             _balanceFilter = _world.Filter<PlayerBalanceComponent>().End();
             _playerBalanceComponents = _world.GetPool<PlayerBalanceComponent>();
@@ -86,16 +89,18 @@ namespace _Project.Scripts.UI.Gameplay.ButtonLVLUp
 
             foreach (var entity in _businessFilter)
             {
-                ref BusinessComponents business = ref _businessComponents.Get(entity);
+                ref BusinessIdComponent idComponent = ref _idPool.Get(entity);
+                ref BusinessEconomyComponent economyComponent = ref _economyPool.Get(entity);
+                
 
-                if (business.ID == index)
+                if (idComponent.ID == index)
                 {
                     double priceLevel = _priceLevelUpConfig.Price[index];
                     
                     if (balance.Amount >= priceLevel)
                     {
                         balance.Amount -= priceLevel;
-                        business.Level++;
+                        economyComponent.Level++;
 
                         _businessInformationPresenter?.RefreshLevel();
                         _businessInformationPresenter?.RefreshIncome();
