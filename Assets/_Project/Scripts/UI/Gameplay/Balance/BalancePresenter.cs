@@ -20,16 +20,52 @@ namespace _Project.Scripts.UI.Gameplay.Balance
             _playerBalanceComponent = _world.GetPool<PlayerBalanceComponent>();
         }
 
-        public void UpdateBalancePlayer()
+        public void Enable()
         {
-            if (_playerFilter.GetEntitiesCount() <= 0)
+            if (_world == null)
                 return;
 
-            int playerEntity = _playerFilter.GetRawEntities()[0];
-            
-            ref PlayerBalanceComponent playerBalanceComponent = ref _playerBalanceComponent.Get(playerEntity);
-            
-            _balanceView.SetBalanceText(playerBalanceComponent.Amount);
+            foreach (var playerEntity in _playerFilter)
+            {
+                ref PlayerBalanceComponent playerBalanceComponent = ref _playerBalanceComponent.Get(playerEntity);
+
+                playerBalanceComponent.OnBalanceChanged += OnBalanceChange;
+                return;
+            }
+        }
+
+        public void Disable()
+        {
+            if (_world != null)
+            {
+                foreach (var playerEntity in _playerFilter)
+                {
+                    ref PlayerBalanceComponent playerBalanceComponent = ref _playerBalanceComponent.Get(playerEntity);
+
+                    playerBalanceComponent.OnBalanceChanged -= OnBalanceChange;
+                    return;
+                }
+            }
+        }
+
+        public void ShowStartBalance()
+        {
+            if (_balanceView == null)
+                return;
+
+            foreach (var playerEntity in _playerFilter)
+            {
+                ref PlayerBalanceComponent playerBalanceComponent = ref _playerBalanceComponent.Get(playerEntity);
+
+                _balanceView.SetBalanceText(playerBalanceComponent.Amount);
+
+                return;
+            }
+        }
+
+        private void OnBalanceChange(double balance)
+        {
+            _balanceView?.SetBalanceText(balance);
         }
     }
 }

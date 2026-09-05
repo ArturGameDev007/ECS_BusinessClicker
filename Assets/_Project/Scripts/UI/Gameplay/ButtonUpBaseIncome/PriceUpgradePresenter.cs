@@ -1,4 +1,4 @@
-using _Project.Scripts._Configs;
+using _Project.Scripts.Configs;
 
 namespace _Project.Scripts.UI.Gameplay.ButtonUpBaseIncome
 {
@@ -12,7 +12,7 @@ namespace _Project.Scripts.UI.Gameplay.ButtonUpBaseIncome
             _priceUpgradesView = priceUpgradesView;
             _priceUpgradesConfig = priceUpgradesConfig;
         }
-
+        
         public void ShowPriceFirstUpgrade()
         {
             if (_priceUpgradesView != null)

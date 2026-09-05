@@ -1,4 +1,3 @@
-using _Project.Scripts._Configs;
 using _Project.Scripts.Components;
 using Leopotam.EcsLite;
 
@@ -11,7 +10,6 @@ namespace _Project.Scripts.UI.Gameplay.BusinessModel
 
         private EcsFilter _businessFilter;
 
-        private EcsPool<BusinessIdComponent> _idPool;
         private EcsPool<BusinessEconomyComponent> _economyPool;
 
         public BusinessInformationPresenter(EcsWorld world, BusinessModelView businessModelView)
@@ -19,9 +17,8 @@ namespace _Project.Scripts.UI.Gameplay.BusinessModel
             _world = world;
             _businessModelView = businessModelView;
 
-            _businessFilter = _world.Filter<BusinessIdComponent>().Inc<BusinessEconomyComponent>().End();
+            _businessFilter = _world.Filter<BusinessEconomyComponent>().End();
 
-            _idPool = _world.GetPool<BusinessIdComponent>();
             _economyPool = _world.GetPool<BusinessEconomyComponent>();
         }
 
@@ -32,10 +29,9 @@ namespace _Project.Scripts.UI.Gameplay.BusinessModel
 
             foreach (var entity in _businessFilter)
             {
-                ref BusinessIdComponent idComponent = ref _idPool.Get(entity);
                 ref BusinessEconomyComponent economyComponent = ref _economyPool.Get(entity);
 
-                _businessModelView?.SetLevel(idComponent.ID, economyComponent.Level);
+                _businessModelView?.SetLevel(economyComponent.ID, economyComponent.Level);
             }
         }
 
@@ -46,10 +42,9 @@ namespace _Project.Scripts.UI.Gameplay.BusinessModel
 
             foreach (var entity in _businessFilter)
             {
-                ref BusinessIdComponent idComponent = ref _idPool.Get(entity);
                 ref BusinessEconomyComponent economyComponent = ref _economyPool.Get(entity);
-
-                _businessModelView?.SetIncome(idComponent.ID, economyComponent.BaseIncome);
+            
+                _businessModelView?.SetIncome(economyComponent.ID, economyComponent.BaseIncome);
             }
         }
     }

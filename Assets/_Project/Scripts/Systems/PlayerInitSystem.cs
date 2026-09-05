@@ -1,28 +1,33 @@
 using _Project.Scripts.Components;
+using _Project.Scripts.Services.Save;
 using Leopotam.EcsLite;
 
 namespace _Project.Scripts.Systems
 {
     public sealed class PlayerInitSystem : IEcsInitSystem
     {
-        private readonly double _startBalance;
+        private readonly SaveServices _saveServices;
 
-        public PlayerInitSystem(double startBalance)
+        public PlayerInitSystem(SaveServices saveServices)
         {
-            _startBalance = startBalance;
+            _saveServices = saveServices;
         }
+
+        private EcsPool<PlayerBalanceComponent> _playerBalancePool;
 
         public void Init(IEcsSystems systems)
         {
             EcsWorld world = systems.GetWorld();
             
-            EcsPool<PlayerBalanceComponent> balance = world.GetPool<PlayerBalanceComponent>();
-
+            double loadBalance = _saveServices.HasSave() ? _saveServices.Load().Balance : 0d;
+            
             int playerEntity = world.NewEntity();
 
-            ref PlayerBalanceComponent balanceComponent = ref balance.Add(playerEntity);
+            _playerBalancePool = world.GetPool<PlayerBalanceComponent>();
             
-            balanceComponent.Amount = _startBalance;
+            ref PlayerBalanceComponent balanceComponent = ref _playerBalancePool.Add(playerEntity);
+
+            balanceComponent.Amount = loadBalance;
         }
     }
 }

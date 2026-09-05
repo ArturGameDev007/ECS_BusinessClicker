@@ -1,4 +1,4 @@
-using _Project.Scripts._Configs;
+using _Project.Scripts.Configs;
 
 namespace _Project.Scripts.UI.Gameplay.IncomeUpgrades
 {
