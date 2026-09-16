@@ -8,7 +8,8 @@ namespace _Project.Scripts.UI.Gameplay.Balance
         private readonly EcsWorld _world;
         private readonly BalanceView _balanceView;
 
-        private EcsFilter _playerFilter;
+        private EcsFilter _balanceFilter;
+        
         private EcsPool<PlayerBalanceComponent> _playerBalanceComponent;
         private EcsPool<BalanceChangedEventComponent> _balanceChangedEventComponent;
 
@@ -17,7 +18,8 @@ namespace _Project.Scripts.UI.Gameplay.Balance
             _world = world;
             _balanceView = balanceView;
 
-            _playerFilter = _world.Filter<PlayerBalanceComponent>().End();
+            _balanceFilter = _world.Filter<PlayerBalanceComponent>().End();
+            
             _playerBalanceComponent = _world.GetPool<PlayerBalanceComponent>();
             _balanceChangedEventComponent = _world.GetPool<BalanceChangedEventComponent>();
         }
@@ -27,7 +29,7 @@ namespace _Project.Scripts.UI.Gameplay.Balance
             if (_balanceView == null)
                 return;
         
-            foreach (var entity in _playerFilter)
+            foreach (var entity in _balanceFilter)
             {
                 ref PlayerBalanceComponent playerBalanceComponent = ref _playerBalanceComponent.Get(entity);
                 
@@ -42,7 +44,7 @@ namespace _Project.Scripts.UI.Gameplay.Balance
             if (_balanceView == null)
                 return;
 
-            foreach (var playerEntity in _playerFilter)
+            foreach (var playerEntity in _balanceFilter)
             {
                 ref PlayerBalanceComponent playerBalanceComponent = ref _playerBalanceComponent.Get(playerEntity);
 

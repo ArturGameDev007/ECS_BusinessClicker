@@ -47,19 +47,19 @@ namespace _Project.Scripts.Infrastructure
             BusinessNamePresenter namePresenter = new BusinessNamePresenter(_businessNameView);
             BalancePresenter balancePresenter = new BalancePresenter(world,_balanceView);
             BusinessInformationPresenter informationPresenter = new BusinessInformationPresenter(world, _businessModelView);
-            ButtonLevelUpPresenter buttonLevelUpPresenter = new ButtonLevelUpPresenter(_buttonLevelUpView, world);
+            ButtonLevelUpPresenter buttonLevelUpPresenter = new ButtonLevelUpPresenter(_buttonLevelUpView, informationPresenter, world);
             UpgradeNamesPresenter upgradeNamesPresenter = new UpgradeNamesPresenter(_upgradeNamesView);
             IncomeUpgradePresenter incomeUpgradePresenter = new IncomeUpgradePresenter(_incomeUpgradeView, _incomeUpgradesConfig);
             PriceLevelUpPresenter levelUpPresenter = new PriceLevelUpPresenter(_priceView, _levelUpConfig);
             PriceUpgradePresenter priceUpgradePresenter = new PriceUpgradePresenter(_priceUpgradesView, _priceUpgradesConfig);
-            ButtonUpIncomePresenter upIncomePresenter = new ButtonUpIncomePresenter(world, _buttonUpIncomeView, priceUpgradePresenter);
+            ButtonUpIncomePresenter upIncomePresenter = new ButtonUpIncomePresenter(world, _buttonUpIncomeView, informationPresenter, priceUpgradePresenter);
             BarIncomePresenter incomePresenter = new BarIncomePresenter(world, _barIncomeView);
 
             EcsSystemManager ecsSystemManager = new EcsSystemManager(world, saveServices, _levelUpConfig, _priceUpgradesConfig);
             SaveData saveData = new SaveData(world, saveServices);
             
             return new GameManager(world, businessFactory, saveServices, _businessNamesConfig, _upgradeNamesConfig, 
-                namePresenter, incomePresenter, buttonLevelUpPresenter, upgradeNamesPresenter, informationPresenter, levelUpPresenter, 
+                namePresenter, incomePresenter, buttonLevelUpPresenter, upgradeNamesPresenter, levelUpPresenter, 
                 incomeUpgradePresenter, upIncomePresenter, priceUpgradePresenter, balancePresenter, ecsSystemManager, saveData);
         }
 

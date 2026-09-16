@@ -1,5 +1,4 @@
 using _Project.Scripts.Components;
-using _Project.Scripts.Configs;
 using _Project.Scripts.UI.Gameplay.BusinessModel;
 using Leopotam.EcsLite;
 
@@ -9,6 +8,7 @@ namespace _Project.Scripts.UI.Gameplay.ButtonUpBaseIncome
     {
         private readonly EcsWorld _world;
         private readonly ButtonUpIncomeView _buttonUpIncomeView;
+        private readonly BusinessInformationPresenter _businessInformationPresenter;
         private readonly PriceUpgradePresenter _priceUpgradePresenter;
 
         private EcsFilter _businessFilter;
@@ -17,11 +17,15 @@ namespace _Project.Scripts.UI.Gameplay.ButtonUpBaseIncome
         private EcsPool<BuyFirstUpgradeRequestComponent> _firstRequestPool;
         private EcsPool<BuySecondUpgradeRequestComponent> _secondRequestPool;
 
+        private EcsPool<BusinessIncomeChangedEventComponent> _firstUpgradeChangedEventPool;
+
         public ButtonUpIncomePresenter(EcsWorld world, ButtonUpIncomeView buttonUpIncomeView,
+            BusinessInformationPresenter businessInformationPresenter,
             PriceUpgradePresenter priceUpgradePresenter)
         {
             _world = world;
             _buttonUpIncomeView = buttonUpIncomeView;
+            _businessInformationPresenter = businessInformationPresenter;
             _priceUpgradePresenter = priceUpgradePresenter;
 
             _businessFilter = _world.Filter<BusinessEconomyComponent>().End();
@@ -29,6 +33,8 @@ namespace _Project.Scripts.UI.Gameplay.ButtonUpBaseIncome
             _economyPool = _world.GetPool<BusinessEconomyComponent>();
             _firstRequestPool = _world.GetPool<BuyFirstUpgradeRequestComponent>();
             _secondRequestPool = _world.GetPool<BuySecondUpgradeRequestComponent>();
+
+            _firstUpgradeChangedEventPool = _world.GetPool<BusinessIncomeChangedEventComponent>();
         }
 
         public void Init()
@@ -72,6 +78,18 @@ namespace _Project.Scripts.UI.Gameplay.ButtonUpBaseIncome
             }
         }
 
+        public void UpdateIncome()
+        {
+            foreach (var entity in _businessFilter)
+            {
+                ref BusinessEconomyComponent economyComponent = ref _economyPool.Get(entity);
+                
+                _businessInformationPresenter?.RefreshIncome(economyComponent.ID, economyComponent.BaseIncome);
+                
+                _firstUpgradeChangedEventPool.Del(entity);
+            }
+        }
+
         private void OnButtonFirstUpgradeClick(int index)
         {
             TryBuyUpgrade(index, isFirstUpgrade: true);
@@ -93,7 +111,7 @@ namespace _Project.Scripts.UI.Gameplay.ButtonUpBaseIncome
 
                 if (economyComponent.ID != index)
                     continue;
-                
+
                 if (isFirstUpgrade)
                 {
                     if (!_firstRequestPool.Has(entity))
@@ -117,18 +135,18 @@ namespace _Project.Scripts.UI.Gameplay.ButtonUpBaseIncome
         {
             if (_buttonUpIncomeView == null)
                 return;
-            
+        
             foreach (var entity in _businessFilter)
             {
                 ref BusinessEconomyComponent economyComponent = ref _economyPool.Get(entity);
                 int index = economyComponent.ID;
-            
+        
                 if (economyComponent.FirstUpgradeIncome > 0)
                 {
                     _priceUpgradePresenter?.ShowMessageForFirstUpgrade(index);
                     _buttonUpIncomeView.ButtonFirstUpgrade[index].interactable = false;
                 }
-            
+        
                 if (economyComponent.SecondUpgradeIncome > 0)
                 {
                     _priceUpgradePresenter?.ShowMessageForSecondUpgrade(index);

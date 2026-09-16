@@ -3,7 +3,6 @@ using _Project.Scripts.Infrastructure.EcsCore;
 using _Project.Scripts.Services.Save;
 using _Project.Scripts.UI.Gameplay.Balance;
 using _Project.Scripts.UI.Gameplay.BarIncome;
-using _Project.Scripts.UI.Gameplay.BusinessModel;
 using _Project.Scripts.UI.Gameplay.ButtonLVLUp;
 using _Project.Scripts.UI.Gameplay.ButtonUpBaseIncome;
 using _Project.Scripts.UI.Gameplay.IncomeUpgrades;
@@ -25,7 +24,6 @@ namespace _Project.Scripts.Infrastructure
         private readonly BarIncomePresenter _barIncomePresenter;
         private readonly ButtonLevelUpPresenter _buttonLevelUpPresenter;
         private readonly UpgradeNamesPresenter _upgradeNamesPresenter;
-        private readonly BusinessInformationPresenter _businessInformationPresenter;
         private readonly PriceLevelUpPresenter _levelUpPresenter;
         private readonly IncomeUpgradePresenter _incomeUpgradePresenter;
         private readonly ButtonUpIncomePresenter _buttonUpIncomePresenter;
@@ -40,8 +38,7 @@ namespace _Project.Scripts.Infrastructure
         public GameManager(EcsWorld world, BusinessFactory businessFactory, SaveServices saveServices,
             BusinessNamesConfig businessNamesConfig, UpgradeNamesConfig upgradeNamesConfig,
             BusinessNamePresenter businessNamePresenter, BarIncomePresenter barIncomePresenter, ButtonLevelUpPresenter buttonLevelUpPresenter,
-            UpgradeNamesPresenter upgradeNamesPresenter, BusinessInformationPresenter businessInformationPresenter,
-            PriceLevelUpPresenter levelUpPresenter, IncomeUpgradePresenter incomeUpgradePresenter,
+            UpgradeNamesPresenter upgradeNamesPresenter, PriceLevelUpPresenter levelUpPresenter, IncomeUpgradePresenter incomeUpgradePresenter,
             ButtonUpIncomePresenter buttonUpIncomePresenter, PriceUpgradePresenter priceUpgradePresenter,
             BalancePresenter balancePresenter, EcsSystemManager ecsSystemManager, SaveData saveData)
         {
@@ -54,7 +51,6 @@ namespace _Project.Scripts.Infrastructure
             _barIncomePresenter = barIncomePresenter;
             _buttonLevelUpPresenter = buttonLevelUpPresenter;
             _upgradeNamesPresenter = upgradeNamesPresenter;
-            _businessInformationPresenter = businessInformationPresenter;
             _levelUpPresenter = levelUpPresenter;
             _incomeUpgradePresenter = incomeUpgradePresenter;
             _buttonUpIncomePresenter = buttonUpIncomePresenter;
@@ -113,9 +109,6 @@ namespace _Project.Scripts.Infrastructure
             _balancePresenter?.ShowStartBalance();
             _levelUpPresenter?.ShowPriceLevelUp();
 
-            _businessInformationPresenter?.RefreshLevel();
-            _businessInformationPresenter?.RefreshIncome();
-
             _incomeUpgradePresenter?.ShowIncomeUpgrades();
 
             _priceUpgradePresenter?.ShowPriceFirstUpgrade();
@@ -133,8 +126,8 @@ namespace _Project.Scripts.Infrastructure
             _balancePresenter?.UpdateBalance();
             _barIncomePresenter?.Tick();
             
-            _businessInformationPresenter?.RefreshLevel();
-            _businessInformationPresenter?.RefreshIncome();
+            _buttonLevelUpPresenter?.UpdateLevelUp();
+            _buttonUpIncomePresenter?.UpdateIncome();
             
             _buttonUpIncomePresenter?.StateButton();
         }

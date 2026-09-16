@@ -43,9 +43,7 @@ namespace _Project.Scripts.Systems
                 ref BusinessEconomyComponent economyComponent = ref _economyPool.Get(businessEntity);
 
                 if (economyComponent.Level <= 0)
-                {
                     continue;
-                }
 
                 progressComponent.CurrentTime += Time.deltaTime;
 

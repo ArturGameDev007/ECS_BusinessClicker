@@ -18,6 +18,9 @@ namespace _Project.Scripts.Systems
         private EcsPool<PlayerBalanceComponent> _playerBalancePool;
         private EcsPool<BuyFirstUpgradeRequestComponent> _buyFirstUpgradePool;
         private EcsPool<BuySecondUpgradeRequestComponent> _buySecondUpgradePool;
+        
+        private EcsPool<BalanceChangedEventComponent> _balanceChangedEventPool;
+        private EcsPool<BusinessIncomeChangedEventComponent> _firstUpgradeChangedEventPool;
 
         public BuyUpgradeSystem(PriceUpgradesConfig priceUpgradesConfig)
         {
@@ -28,14 +31,17 @@ namespace _Project.Scripts.Systems
         {
             _world = systems.GetWorld();
 
-            _firstRequestFilter = _world.Filter<BuyFirstUpgradeRequestComponent>().Inc<BusinessEconomyComponent>().End();
-            _secondRequestFilter = _world.Filter<BuySecondUpgradeRequestComponent>().Inc<BusinessEconomyComponent>().End();
+            _firstRequestFilter = _world.Filter<BusinessEconomyComponent>().Inc<BuyFirstUpgradeRequestComponent>().End();
+            _secondRequestFilter = _world.Filter<BusinessEconomyComponent>().Inc<BuySecondUpgradeRequestComponent>().End();
             _playerFilter = _world.Filter<PlayerBalanceComponent>().End();
 
             _economyPool = _world.GetPool<BusinessEconomyComponent>();
             _playerBalancePool = _world.GetPool<PlayerBalanceComponent>();
             _buyFirstUpgradePool = _world.GetPool<BuyFirstUpgradeRequestComponent>();
             _buySecondUpgradePool = _world.GetPool<BuySecondUpgradeRequestComponent>();
+            
+            _balanceChangedEventPool = _world.GetPool<BalanceChangedEventComponent>();
+            _firstUpgradeChangedEventPool = _world.GetPool<BusinessIncomeChangedEventComponent>();
         }
 
         public void Run(IEcsSystems systems)
@@ -90,6 +96,12 @@ namespace _Project.Scripts.Systems
                 economyComponent.FirstUpgradeIncome = upgradePercent;
             else
                 economyComponent.SecondUpgradeIncome = upgradePercent;
+
+            if (!_balanceChangedEventPool.Has(playerEntity))
+                _balanceChangedEventPool.Add(playerEntity);
+            
+            if (!_firstUpgradeChangedEventPool.Has(entity))
+                _firstUpgradeChangedEventPool.Add(entity);
         }
     }
 }

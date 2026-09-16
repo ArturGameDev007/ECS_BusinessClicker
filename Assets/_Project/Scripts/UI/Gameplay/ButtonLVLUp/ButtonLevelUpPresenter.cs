@@ -1,4 +1,5 @@
 using _Project.Scripts.Components;
+using _Project.Scripts.UI.Gameplay.BusinessModel;
 using Leopotam.EcsLite;
 
 namespace _Project.Scripts.UI.Gameplay.ButtonLVLUp
@@ -6,22 +7,26 @@ namespace _Project.Scripts.UI.Gameplay.ButtonLVLUp
     public class ButtonLevelUpPresenter
     {
         private readonly ButtonLevelUpView _view;
+        private readonly BusinessInformationPresenter _businessInformationPresenter;
         private readonly EcsWorld _world;
 
         private EcsFilter _businessFilter;
 
         private EcsPool<BusinessEconomyComponent> _economyPool;
         private EcsPool<BuyLevelRequestComponent> _buyLevelRequestPool;
+        private EcsPool<LevelChangedEventComponent> _levelChangedEventPool;
 
-        public ButtonLevelUpPresenter(ButtonLevelUpView view, EcsWorld world)
+        public ButtonLevelUpPresenter(ButtonLevelUpView view, BusinessInformationPresenter businessInformationPresenter, EcsWorld world)
         {
             _view = view;
+            _businessInformationPresenter = businessInformationPresenter;
             _world = world;
 
             _businessFilter = _world.Filter<BusinessEconomyComponent>().End();
 
             _economyPool = _world.GetPool<BusinessEconomyComponent>();
             _buyLevelRequestPool = _world.GetPool<BuyLevelRequestComponent>();
+            _levelChangedEventPool = _world.GetPool<LevelChangedEventComponent>();
         }
 
         public void Init()
@@ -51,6 +56,18 @@ namespace _Project.Scripts.UI.Gameplay.ButtonLVLUp
                     int index = i;
                     _view.ButtonBuy[i].onClick.RemoveListener(() => OnButtonClickBuyLevelUp(index));
                 }
+            }
+        }
+        
+        public void UpdateLevelUp()
+        {
+            foreach (var entity in _businessFilter)
+            {
+                ref BusinessEconomyComponent  economyComponent = ref _economyPool.Get(entity);
+                
+                _businessInformationPresenter?.RefreshLevel(economyComponent.ID, economyComponent.Level);
+                
+                _levelChangedEventPool.Del(entity);
             }
         }
 

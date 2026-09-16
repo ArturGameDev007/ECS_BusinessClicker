@@ -1,4 +1,3 @@
-using _Project.Scripts.Components;
 using Leopotam.EcsLite;
 
 namespace _Project.Scripts.UI.Gameplay.BusinessModel
@@ -8,44 +7,26 @@ namespace _Project.Scripts.UI.Gameplay.BusinessModel
         private readonly EcsWorld _world;
         private readonly BusinessModelView _businessModelView;
 
-        private EcsFilter _businessFilter;
-
-        private EcsPool<BusinessEconomyComponent> _economyPool;
-
         public BusinessInformationPresenter(EcsWorld world, BusinessModelView businessModelView)
         {
             _world = world;
             _businessModelView = businessModelView;
-
-            _businessFilter = _world.Filter<BusinessEconomyComponent>().End();
-
-            _economyPool = _world.GetPool<BusinessEconomyComponent>();
         }
 
-        public void RefreshLevel()
+        public void RefreshLevel(int id, int level)
         {
             if (_world == null)
                 return;
 
-            foreach (var entity in _businessFilter)
-            {
-                ref BusinessEconomyComponent economyComponent = ref _economyPool.Get(entity);
-
-                _businessModelView?.SetLevel(economyComponent.ID, economyComponent.Level);
-            }
+            _businessModelView?.SetLevel(id, level);
         }
 
-        public void RefreshIncome()
+        public void RefreshIncome(int id, double income)
         {
             if (_world == null)
                 return;
 
-            foreach (var entity in _businessFilter)
-            {
-                ref BusinessEconomyComponent economyComponent = ref _economyPool.Get(entity);
-            
-                _businessModelView?.SetIncome(economyComponent.ID, economyComponent.BaseIncome);
-            }
+            _businessModelView?.SetIncome(id, income);
         }
     }
 }
