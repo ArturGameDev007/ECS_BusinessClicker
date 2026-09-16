@@ -11,7 +11,6 @@ namespace _Project.Scripts.UI.Gameplay.BarIncome
         private EcsFilter _businessFilter;
         private EcsFilter _playerFilter;
 
-        // private EcsPool<BusinessIdComponent> _idPool;
         private EcsPool<BusinessEconomyComponent> _economyPool;
         private EcsPool<BusinessProgressComponent> _progressPool;
 
@@ -20,10 +19,8 @@ namespace _Project.Scripts.UI.Gameplay.BarIncome
             _world = world;
             _barIncomeView = barIncomeView;
 
-            // _businessFilter = _world.Filter<BusinessIdComponent>().Inc<BusinessProgressComponent>().End();
             _businessFilter = _world.Filter<BusinessEconomyComponent>().Inc<BusinessProgressComponent>().End();
 
-            // _idPool = _world.GetPool<BusinessIdComponent>();
             _economyPool = _world.GetPool<BusinessEconomyComponent>();
             _progressPool = _world.GetPool<BusinessProgressComponent>();
         }
@@ -35,7 +32,6 @@ namespace _Project.Scripts.UI.Gameplay.BarIncome
         
             foreach (var entity in _businessFilter)
             {
-                // ref BusinessIdComponent idComponent = ref _idPool.Get(entity);
                 ref BusinessEconomyComponent economyComponent = ref _economyPool.Get(entity);
                 ref BusinessProgressComponent progressComponent = ref _progressPool.Get(entity);
         

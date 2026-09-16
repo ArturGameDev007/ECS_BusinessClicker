@@ -1,6 +1,4 @@
 using _Project.Scripts.Components;
-using _Project.Scripts.UI.Gameplay.Balance;
-using _Project.Scripts.UI.Gameplay.BusinessModel;
 using Leopotam.EcsLite;
 
 namespace _Project.Scripts.UI.Gameplay.ButtonLVLUp
@@ -8,23 +6,22 @@ namespace _Project.Scripts.UI.Gameplay.ButtonLVLUp
     public class ButtonLevelUpPresenter
     {
         private readonly ButtonLevelUpView _view;
-        private readonly BusinessInformationPresenter _businessInformationPresenter;
         private readonly EcsWorld _world;
 
         private EcsFilter _businessFilter;
 
         private EcsPool<BusinessEconomyComponent> _economyPool;
+        private EcsPool<BuyLevelRequestComponent> _buyLevelRequestPool;
 
-        public ButtonLevelUpPresenter(ButtonLevelUpView view, BusinessInformationPresenter businessInformationPresenter,
-            EcsWorld world)
+        public ButtonLevelUpPresenter(ButtonLevelUpView view, EcsWorld world)
         {
             _view = view;
-            _businessInformationPresenter = businessInformationPresenter;
             _world = world;
 
             _businessFilter = _world.Filter<BusinessEconomyComponent>().End();
 
             _economyPool = _world.GetPool<BusinessEconomyComponent>();
+            _buyLevelRequestPool = _world.GetPool<BuyLevelRequestComponent>();
         }
 
         public void Init()
@@ -74,17 +71,11 @@ namespace _Project.Scripts.UI.Gameplay.ButtonLVLUp
                 if (economyComponent.ID != index)
                     continue;
 
-                economyComponent.OnBuyLevelSuccess?.Invoke(index);
-
-                RefreshUI();
+                if (!_buyLevelRequestPool.Has(entity))
+                    _buyLevelRequestPool.Add(entity);
+                
                 break;
             }
-        }
-
-        private void RefreshUI()
-        {
-            _businessInformationPresenter?.RefreshLevel();
-            _businessInformationPresenter?.RefreshIncome();
         }
     }
 }

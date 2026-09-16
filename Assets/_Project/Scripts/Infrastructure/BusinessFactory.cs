@@ -58,7 +58,7 @@ namespace _Project.Scripts.Infrastructure
 
             progressComponent.CurrentValueSlider = 0f;
             progressComponent.MaxValueSlider = 100f;
-            progressComponent.CountSliderStep = 20f;
+            progressComponent.CountSliderStep = 25f;
             progressComponent.CurrentTime = 0f;
 
             if (index >= 0 && index < _barIncomeConfig.IncomeDuration.Length)

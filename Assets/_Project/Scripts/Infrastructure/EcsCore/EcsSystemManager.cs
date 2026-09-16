@@ -1,8 +1,6 @@
 using _Project.Scripts.Configs;
 using _Project.Scripts.Services.Save;
 using _Project.Scripts.Systems;
-using _Project.Scripts.UI.Gameplay.Balance;
-using _Project.Scripts.UI.Gameplay.BarIncome;
 using Leopotam.EcsLite;
 
 namespace _Project.Scripts.Infrastructure.EcsCore

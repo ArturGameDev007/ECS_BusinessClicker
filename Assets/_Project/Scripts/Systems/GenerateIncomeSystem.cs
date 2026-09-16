@@ -12,6 +12,7 @@ namespace _Project.Scripts.Systems
         private EcsPool<BusinessProgressComponent> _progressPool;
         private EcsPool<BusinessEconomyComponent> _economyPool;
         private EcsPool<PlayerBalanceComponent> _balanceComponentsPool;
+        private EcsPool<BalanceChangedEventComponent> _balanceUpdatePool;
 
         public void Init(IEcsSystems systems)
         {
@@ -24,6 +25,8 @@ namespace _Project.Scripts.Systems
 
             _playerFilter = world.Filter<PlayerBalanceComponent>().End();
             _balanceComponentsPool = world.GetPool<PlayerBalanceComponent>();
+            
+            _balanceUpdatePool = world.GetPool<BalanceChangedEventComponent>();
         }
 
         public void Run(IEcsSystems systems)
@@ -58,9 +61,10 @@ namespace _Project.Scripts.Systems
                         progressComponent.CurrentValueSlider = 0f;
                         balance.Amount += economyComponent.FinalReward;
                         
-                        balance.OnBalanceChanged?.Invoke(balance.Amount);
+                        if (!_balanceUpdatePool.Has(playerEntity))
+                            _balanceUpdatePool.Add(playerEntity);
                     }
-
+                    
                     progressComponent.CurrentTime -= timer;
                 }
             }

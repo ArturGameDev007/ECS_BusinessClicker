@@ -2,7 +2,6 @@ using System;
 using _Project.Scripts.Configs;
 using _Project.Scripts.Infrastructure.EcsCore;
 using _Project.Scripts.Services.Save;
-using _Project.Scripts.Systems;
 using _Project.Scripts.UI.Gameplay.Balance;
 using _Project.Scripts.UI.Gameplay.BarIncome;
 using _Project.Scripts.UI.Gameplay.BusinessModel;
@@ -48,12 +47,12 @@ namespace _Project.Scripts.Infrastructure
             BusinessNamePresenter namePresenter = new BusinessNamePresenter(_businessNameView);
             BalancePresenter balancePresenter = new BalancePresenter(world,_balanceView);
             BusinessInformationPresenter informationPresenter = new BusinessInformationPresenter(world, _businessModelView);
-            ButtonLevelUpPresenter buttonLevelUpPresenter = new ButtonLevelUpPresenter(_buttonLevelUpView, informationPresenter, world);
+            ButtonLevelUpPresenter buttonLevelUpPresenter = new ButtonLevelUpPresenter(_buttonLevelUpView, world);
             UpgradeNamesPresenter upgradeNamesPresenter = new UpgradeNamesPresenter(_upgradeNamesView);
             IncomeUpgradePresenter incomeUpgradePresenter = new IncomeUpgradePresenter(_incomeUpgradeView, _incomeUpgradesConfig);
             PriceLevelUpPresenter levelUpPresenter = new PriceLevelUpPresenter(_priceView, _levelUpConfig);
             PriceUpgradePresenter priceUpgradePresenter = new PriceUpgradePresenter(_priceUpgradesView, _priceUpgradesConfig);
-            ButtonUpIncomePresenter upIncomePresenter = new ButtonUpIncomePresenter(world, _buttonUpIncomeView, priceUpgradePresenter, informationPresenter);
+            ButtonUpIncomePresenter upIncomePresenter = new ButtonUpIncomePresenter(world, _buttonUpIncomeView, priceUpgradePresenter);
             BarIncomePresenter incomePresenter = new BarIncomePresenter(world, _barIncomeView);
 
             EcsSystemManager ecsSystemManager = new EcsSystemManager(world, saveServices, _levelUpConfig, _priceUpgradesConfig);

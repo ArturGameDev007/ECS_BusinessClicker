@@ -1,6 +1,5 @@
 using _Project.Scripts.Components;
 using _Project.Scripts.Configs;
-using _Project.Scripts.UI.Gameplay.Balance;
 using _Project.Scripts.UI.Gameplay.BusinessModel;
 using Leopotam.EcsLite;
 
@@ -9,27 +8,27 @@ namespace _Project.Scripts.UI.Gameplay.ButtonUpBaseIncome
     public class ButtonUpIncomePresenter
     {
         private readonly EcsWorld _world;
-
         private readonly ButtonUpIncomeView _buttonUpIncomeView;
-
         private readonly PriceUpgradePresenter _priceUpgradePresenter;
-        private readonly BusinessInformationPresenter _businessInformationPresenter;
 
         private EcsFilter _businessFilter;
 
         private EcsPool<BusinessEconomyComponent> _economyPool;
+        private EcsPool<BuyFirstUpgradeRequestComponent> _firstRequestPool;
+        private EcsPool<BuySecondUpgradeRequestComponent> _secondRequestPool;
 
         public ButtonUpIncomePresenter(EcsWorld world, ButtonUpIncomeView buttonUpIncomeView,
-            PriceUpgradePresenter priceUpgradePresenter, BusinessInformationPresenter businessInformationPresenter)
+            PriceUpgradePresenter priceUpgradePresenter)
         {
             _world = world;
             _buttonUpIncomeView = buttonUpIncomeView;
             _priceUpgradePresenter = priceUpgradePresenter;
-            _businessInformationPresenter = businessInformationPresenter;
 
             _businessFilter = _world.Filter<BusinessEconomyComponent>().End();
 
             _economyPool = _world.GetPool<BusinessEconomyComponent>();
+            _firstRequestPool = _world.GetPool<BuyFirstUpgradeRequestComponent>();
+            _secondRequestPool = _world.GetPool<BuySecondUpgradeRequestComponent>();
         }
 
         public void Init()
@@ -54,7 +53,7 @@ namespace _Project.Scripts.UI.Gameplay.ButtonUpBaseIncome
         {
             for (int i = 0; i < _buttonUpIncomeView.ButtonFirstUpgrade.Length; i++)
             {
-                if (_buttonUpIncomeView != null)
+                if (_buttonUpIncomeView.ButtonFirstUpgrade[i] != null)
                 {
                     int index = i;
                     _buttonUpIncomeView.ButtonFirstUpgrade[i].onClick
@@ -64,7 +63,7 @@ namespace _Project.Scripts.UI.Gameplay.ButtonUpBaseIncome
 
             for (int i = 0; i < _buttonUpIncomeView.ButtonSecondUpgrade.Length; i++)
             {
-                if (_buttonUpIncomeView != null)
+                if (_buttonUpIncomeView.ButtonSecondUpgrade[i] != null)
                 {
                     int index = i;
                     _buttonUpIncomeView.ButtonSecondUpgrade[i].onClick
@@ -91,36 +90,50 @@ namespace _Project.Scripts.UI.Gameplay.ButtonUpBaseIncome
             foreach (var entity in _businessFilter)
             {
                 ref BusinessEconomyComponent economyComponent = ref _economyPool.Get(entity);
-                
+
                 if (economyComponent.ID != index)
                     continue;
-
-                if (isFirstUpgrade)
-                    economyComponent.OnBuyFirstUpgradeSuccess?.Invoke(index);
-                else
-                    economyComponent.OnBuySecondUpgradeSuccess?.Invoke(index);
-
-                bool purchased = isFirstUpgrade
-                    ? economyComponent.FirstUpgradeIncome > 0
-                    : economyComponent.SecondUpgradeIncome > 0;
-
-                if (purchased)
-                {
-                    if (isFirstUpgrade)
-                    {
-                        _priceUpgradePresenter?.ShowMessageForFirstUpgrade(economyComponent.ID);
-                        _buttonUpIncomeView.ButtonFirstUpgrade[index].interactable = false;
-                    }
-                    else
-                    {
-                        _priceUpgradePresenter?.ShowMessageForSecondUpgrade(economyComponent.ID);
-                        _buttonUpIncomeView.ButtonSecondUpgrade[index].interactable = false;
-                    }
-
-                    _businessInformationPresenter?.RefreshIncome();
-                }
                 
+                if (isFirstUpgrade)
+                {
+                    if (!_firstRequestPool.Has(entity))
+                    {
+                        _firstRequestPool.Add(entity);
+                    }
+                }
+                else
+                {
+                    if (!_secondRequestPool.Has(entity))
+                    {
+                        _secondRequestPool.Add(entity);
+                    }
+                }
+
                 break;
+            }
+        }
+
+        public void StateButton()
+        {
+            if (_buttonUpIncomeView == null)
+                return;
+            
+            foreach (var entity in _businessFilter)
+            {
+                ref BusinessEconomyComponent economyComponent = ref _economyPool.Get(entity);
+                int index = economyComponent.ID;
+            
+                if (economyComponent.FirstUpgradeIncome > 0)
+                {
+                    _priceUpgradePresenter?.ShowMessageForFirstUpgrade(index);
+                    _buttonUpIncomeView.ButtonFirstUpgrade[index].interactable = false;
+                }
+            
+                if (economyComponent.SecondUpgradeIncome > 0)
+                {
+                    _priceUpgradePresenter?.ShowMessageForSecondUpgrade(index);
+                    _buttonUpIncomeView.ButtonSecondUpgrade[index].interactable = false;
+                }
             }
         }
     }

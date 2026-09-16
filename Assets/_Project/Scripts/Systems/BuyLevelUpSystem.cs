@@ -4,18 +4,19 @@ using Leopotam.EcsLite;
 
 namespace _Project.Scripts.Systems
 {
-    public sealed class BuyLevelUpSystem : IEcsInitSystem, IEcsDestroySystem
+    public sealed class BuyLevelUpSystem : IEcsInitSystem, IEcsRunSystem
     {
         private readonly PriceLevelUpConfig _levelUpConfig;
 
         private EcsWorld _world;
 
-        private EcsFilter _businessFilter;
+        private EcsFilter _requestFilter;
         private EcsFilter _playerFilter;
 
         private EcsPool<BusinessEconomyComponent> _economyPool;
         private EcsPool<PlayerBalanceComponent> _playerBalancePool;
-        
+        private EcsPool<BuyLevelRequestComponent> _buyLevelRequestPool;
+
         public BuyLevelUpSystem(PriceLevelUpConfig levelUpConfig)
         {
             _levelUpConfig = levelUpConfig;
@@ -25,31 +26,15 @@ namespace _Project.Scripts.Systems
         {
             _world = systems.GetWorld();
 
-            _businessFilter = _world.Filter<BusinessEconomyComponent>().End();
+            _requestFilter = _world.Filter<BuyLevelRequestComponent>().Inc<BusinessEconomyComponent>().End();
             _playerFilter = _world.Filter<PlayerBalanceComponent>().End();
 
             _economyPool = _world.GetPool<BusinessEconomyComponent>();
             _playerBalancePool = _world.GetPool<PlayerBalanceComponent>();
-            
-            foreach (var entity in _businessFilter)
-            {
-                ref BusinessEconomyComponent  economyComponent = ref _economyPool.Get(entity);
-
-                economyComponent.OnBuyLevelSuccess += ProcessBuy;
-            }
+            _buyLevelRequestPool = _world.GetPool<BuyLevelRequestComponent>();
         }
 
-        public void Destroy(IEcsSystems systems)
-        {
-            foreach (var entity in _businessFilter)
-            {
-                ref BusinessEconomyComponent  economyComponent = ref _economyPool.Get(entity);
-
-                economyComponent.OnBuyLevelSuccess -= ProcessBuy;
-            }
-        }
-        
-        private void ProcessBuy(int index)
+        public void Run(IEcsSystems systems)
         {
             if (_playerFilter.GetEntitiesCount() <= 0)
                 return;
@@ -57,22 +42,19 @@ namespace _Project.Scripts.Systems
             int playerEntity = _playerFilter.GetRawEntities()[0];
             ref PlayerBalanceComponent balance = ref _playerBalancePool.Get(playerEntity);
 
-            foreach (var entity in _businessFilter)
+            foreach (var entity in _requestFilter)
             {
                 ref BusinessEconomyComponent economyComponent = ref _economyPool.Get(entity);
-                
-                if (economyComponent.ID != index)
-                    continue;
-                
-                double priceLevel = _levelUpConfig.Price[index];
+
+                double priceLevel = _levelUpConfig.Price[economyComponent.ID];
 
                 if (balance.Amount >= priceLevel)
                 {
                     balance.Amount -= priceLevel;
                     economyComponent.Level++;
-                    
-                    balance.OnBalanceChanged?.Invoke(balance.Amount);
                 }
+
+                _buyLevelRequestPool.Del(entity);
             }
         }
     }

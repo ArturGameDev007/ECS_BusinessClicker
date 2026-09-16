@@ -71,18 +71,18 @@ namespace _Project.Scripts.Infrastructure
             
             _ecsSystemManager?.Init();
             
-            _balancePresenter?.Enable();
-            
             RefreshUi();
             
             _buttonLevelUpPresenter?.Init();
             _buttonUpIncomePresenter?.Init();
+            
         }
 
         public void Tick()
         {
             _ecsSystemManager?.Tick();
-            _barIncomePresenter?.Tick();
+
+            UpdateUI();
         }
 
         public void Destroy()
@@ -90,7 +90,6 @@ namespace _Project.Scripts.Infrastructure
             _saveData?.SaveDataPlayer();
             
             _ecsSystemManager?.Destroy();
-            _balancePresenter?.Disable();
 
             _buttonLevelUpPresenter?.Destroy();
             _buttonUpIncomePresenter?.Destroy();
@@ -127,6 +126,17 @@ namespace _Project.Scripts.Infrastructure
         {
             _businessNamePresenter?.ShowBusinessName(_businessNamesConfig.Names);
             _upgradeNamesPresenter?.ShowUpgradeNames(_upgradeNamesConfig.FirstUpgradeName, _upgradeNamesConfig.SecondUpgradeName);
+        }
+
+        private void UpdateUI()
+        {
+            _balancePresenter?.UpdateBalance();
+            _barIncomePresenter?.Tick();
+            
+            _businessInformationPresenter?.RefreshLevel();
+            _businessInformationPresenter?.RefreshIncome();
+            
+            _buttonUpIncomePresenter?.StateButton();
         }
     }
 }

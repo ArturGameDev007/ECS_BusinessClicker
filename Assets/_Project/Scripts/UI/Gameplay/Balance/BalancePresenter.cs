@@ -10,6 +10,7 @@ namespace _Project.Scripts.UI.Gameplay.Balance
 
         private EcsFilter _playerFilter;
         private EcsPool<PlayerBalanceComponent> _playerBalanceComponent;
+        private EcsPool<BalanceChangedEventComponent> _balanceChangedEventComponent;
 
         public BalancePresenter(EcsWorld world, BalanceView balanceView)
         {
@@ -18,33 +19,21 @@ namespace _Project.Scripts.UI.Gameplay.Balance
 
             _playerFilter = _world.Filter<PlayerBalanceComponent>().End();
             _playerBalanceComponent = _world.GetPool<PlayerBalanceComponent>();
+            _balanceChangedEventComponent = _world.GetPool<BalanceChangedEventComponent>();
         }
 
-        public void Enable()
+        public void UpdateBalance()
         {
-            if (_world == null)
+            if (_balanceView == null)
                 return;
-
-            foreach (var playerEntity in _playerFilter)
+        
+            foreach (var entity in _playerFilter)
             {
-                ref PlayerBalanceComponent playerBalanceComponent = ref _playerBalanceComponent.Get(playerEntity);
-
-                playerBalanceComponent.OnBalanceChanged += OnBalanceChange;
-                return;
-            }
-        }
-
-        public void Disable()
-        {
-            if (_world != null)
-            {
-                foreach (var playerEntity in _playerFilter)
-                {
-                    ref PlayerBalanceComponent playerBalanceComponent = ref _playerBalanceComponent.Get(playerEntity);
-
-                    playerBalanceComponent.OnBalanceChanged -= OnBalanceChange;
-                    return;
-                }
+                ref PlayerBalanceComponent playerBalanceComponent = ref _playerBalanceComponent.Get(entity);
+                
+                _balanceView.SetBalanceText(playerBalanceComponent.Amount);
+                
+                _balanceChangedEventComponent.Del(entity);
             }
         }
 
@@ -61,11 +50,6 @@ namespace _Project.Scripts.UI.Gameplay.Balance
 
                 return;
             }
-        }
-
-        private void OnBalanceChange(double balance)
-        {
-            _balanceView?.SetBalanceText(balance);
         }
     }
 }
