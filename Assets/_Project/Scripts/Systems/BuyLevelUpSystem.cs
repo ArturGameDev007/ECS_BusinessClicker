@@ -6,7 +6,7 @@ namespace _Project.Scripts.Systems
 {
     public sealed class BuyLevelUpSystem : IEcsInitSystem, IEcsRunSystem
     {
-        private readonly PriceLevelUpConfig _levelUpConfig;
+        private readonly BusinessConfig _businessConfig;
 
         private EcsWorld _world;
 
@@ -19,9 +19,9 @@ namespace _Project.Scripts.Systems
         private EcsPool<BalanceChangedEventComponent> _balanceChangedEventPool;
         private EcsPool<LevelChangedEventComponent> _levelChangedEventPool;
 
-        public BuyLevelUpSystem(PriceLevelUpConfig levelUpConfig)
+        public BuyLevelUpSystem(BusinessConfig businessConfig)
         {
-            _levelUpConfig = levelUpConfig;
+            _businessConfig = businessConfig;
         }
 
         public void Init(IEcsSystems systems)
@@ -50,7 +50,7 @@ namespace _Project.Scripts.Systems
             {
                 ref BusinessEconomyComponent economyComponent = ref _economyPool.Get(entity);
 
-                double priceLevel = _levelUpConfig.Price[economyComponent.ID];
+                double priceLevel = _businessConfig.GetById(economyComponent.ID).PriceLevelUp;
 
                 if (balance.Amount >= priceLevel)
                 {

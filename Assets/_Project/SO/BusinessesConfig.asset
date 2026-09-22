@@ -1,0 +1,80 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82f45504bd684a5f91a53079f421025d, type: 3}
+  m_Name: BusinessesConfig
+  m_EditorClassIdentifier: 
+  <BaseInformation>k__BackingField:
+  - <ID>k__BackingField: 0
+    <Name>k__BackingField: Business #1
+    <IncomeDuration>k__BackingField: 3
+    <PriceLevelUp>k__BackingField: 3
+    <Upgrade>k__BackingField:
+    - <Name>k__BackingField: '"Upgrade 1"'
+      <Price>k__BackingField: 50
+      <Percent>k__BackingField: 0.5
+      <Income>k__BackingField: 50
+    - <Name>k__BackingField: '"Upgrade 2"'
+      <Price>k__BackingField: 400
+      <Percent>k__BackingField: 1
+      <Income>k__BackingField: 100
+  - <ID>k__BackingField: 1
+    <Name>k__BackingField: Business #2
+    <IncomeDuration>k__BackingField: 6
+    <PriceLevelUp>k__BackingField: 40
+    <Upgrade>k__BackingField:
+    - <Name>k__BackingField: '"Upgrade 1"'
+      <Price>k__BackingField: 1200
+      <Percent>k__BackingField: 1
+      <Income>k__BackingField: 100
+    - <Name>k__BackingField: '"Upgrade 2"'
+      <Price>k__BackingField: 4000
+      <Percent>k__BackingField: 2
+      <Income>k__BackingField: 200
+  - <ID>k__BackingField: 2
+    <Name>k__BackingField: Business #3
+    <IncomeDuration>k__BackingField: 10
+    <PriceLevelUp>k__BackingField: 200
+    <Upgrade>k__BackingField:
+    - <Name>k__BackingField: '"Upgrade 1"'
+      <Price>k__BackingField: 6000
+      <Percent>k__BackingField: 1
+      <Income>k__BackingField: 100
+    - <Name>k__BackingField: '"Upgrade 2"'
+      <Price>k__BackingField: 20000
+      <Percent>k__BackingField: 1.5
+      <Income>k__BackingField: 150
+  - <ID>k__BackingField: 3
+    <Name>k__BackingField: Business #4
+    <IncomeDuration>k__BackingField: 17
+    <PriceLevelUp>k__BackingField: 1000
+    <Upgrade>k__BackingField:
+    - <Name>k__BackingField: '"Upgrade 1"'
+      <Price>k__BackingField: 15000
+      <Percent>k__BackingField: 1
+      <Income>k__BackingField: 100
+    - <Name>k__BackingField: '"Upgrade 2"'
+      <Price>k__BackingField: 50000
+      <Percent>k__BackingField: 2
+      <Income>k__BackingField: 200
+  - <ID>k__BackingField: 4
+    <Name>k__BackingField: Business #5
+    <IncomeDuration>k__BackingField: 30
+    <PriceLevelUp>k__BackingField: 5000
+    <Upgrade>k__BackingField:
+    - <Name>k__BackingField: '"Upgrade 1"'
+      <Price>k__BackingField: 100000
+      <Percent>k__BackingField: 2
+      <Income>k__BackingField: 200
+    - <Name>k__BackingField: '"Upgrade 2"'
+      <Price>k__BackingField: 500000
+      <Percent>k__BackingField: 4
+      <Income>k__BackingField: 400

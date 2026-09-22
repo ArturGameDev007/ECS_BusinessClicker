@@ -8,12 +8,12 @@ namespace _Project.Scripts.Infrastructure
     public class BusinessFactory
     {
         private readonly EcsWorld _world;
-        private readonly BarIncomeConfig _barIncomeConfig;
+        private readonly BusinessConfig _businessConfig;
 
-        public BusinessFactory(EcsWorld world, BarIncomeConfig barIncomeConfig)
+        public BusinessFactory(EcsWorld world, BusinessConfig businessConfig)
         {
             _world = world;
-            _barIncomeConfig = barIncomeConfig;
+            _businessConfig = businessConfig;
         }
 
         public void CreateBusiness(int index, int startLevel, double baseIncome, PlayerSaveData loadedData)
@@ -60,9 +60,7 @@ namespace _Project.Scripts.Infrastructure
             progressComponent.MaxValueSlider = 100f;
             progressComponent.CountSliderStep = 25f;
             progressComponent.CurrentTime = 0f;
-
-            if (index >= 0 && index < _barIncomeConfig.IncomeDuration.Length)
-                progressComponent.IncomeDuration = _barIncomeConfig.IncomeDuration[index];
+            progressComponent.IncomeDuration = _businessConfig.GetById(index).IncomeDuration;
         }
     }
 }

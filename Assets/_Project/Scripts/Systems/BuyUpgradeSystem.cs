@@ -4,9 +4,9 @@ using Leopotam.EcsLite;
 
 namespace _Project.Scripts.Systems
 {
-    public sealed class BuyUpgradeSystem : IEcsInitSystem,IEcsRunSystem
+    public sealed class BuyUpgradeSystem : IEcsInitSystem, IEcsRunSystem
     {
-        private readonly PriceUpgradesConfig _priceUpgradesConfig;
+        private readonly BusinessConfig _businessConfig;
 
         private EcsWorld _world;
 
@@ -18,28 +18,30 @@ namespace _Project.Scripts.Systems
         private EcsPool<PlayerBalanceComponent> _playerBalancePool;
         private EcsPool<BuyFirstUpgradeRequestComponent> _buyFirstUpgradePool;
         private EcsPool<BuySecondUpgradeRequestComponent> _buySecondUpgradePool;
-        
+
         private EcsPool<BalanceChangedEventComponent> _balanceChangedEventPool;
         private EcsPool<BusinessIncomeChangedEventComponent> _firstUpgradeChangedEventPool;
 
-        public BuyUpgradeSystem(PriceUpgradesConfig priceUpgradesConfig)
+        public BuyUpgradeSystem(BusinessConfig businessConfig)
         {
-            _priceUpgradesConfig = priceUpgradesConfig;
+            _businessConfig = businessConfig;
         }
 
         public void Init(IEcsSystems systems)
         {
             _world = systems.GetWorld();
 
-            _firstRequestFilter = _world.Filter<BusinessEconomyComponent>().Inc<BuyFirstUpgradeRequestComponent>().End();
-            _secondRequestFilter = _world.Filter<BusinessEconomyComponent>().Inc<BuySecondUpgradeRequestComponent>().End();
+            _firstRequestFilter =
+                _world.Filter<BusinessEconomyComponent>().Inc<BuyFirstUpgradeRequestComponent>().End();
+            _secondRequestFilter =
+                _world.Filter<BusinessEconomyComponent>().Inc<BuySecondUpgradeRequestComponent>().End();
             _playerFilter = _world.Filter<PlayerBalanceComponent>().End();
 
             _economyPool = _world.GetPool<BusinessEconomyComponent>();
             _playerBalancePool = _world.GetPool<PlayerBalanceComponent>();
             _buyFirstUpgradePool = _world.GetPool<BuyFirstUpgradeRequestComponent>();
             _buySecondUpgradePool = _world.GetPool<BuySecondUpgradeRequestComponent>();
-            
+
             _balanceChangedEventPool = _world.GetPool<BalanceChangedEventComponent>();
             _firstUpgradeChangedEventPool = _world.GetPool<BusinessIncomeChangedEventComponent>();
         }
@@ -48,13 +50,13 @@ namespace _Project.Scripts.Systems
         {
             foreach (var entity in _firstRequestFilter)
             {
-                ProcessBuy(entity,true);
+                ProcessBuy(entity, true);
                 _buyFirstUpgradePool.Del(entity);
             }
-            
+
             foreach (var entity in _secondRequestFilter)
             {
-                ProcessBuy(entity,false);
+                ProcessBuy(entity, false);
                 _buySecondUpgradePool.Del(entity);
             }
         }
@@ -66,9 +68,9 @@ namespace _Project.Scripts.Systems
 
             int playerEntity = _playerFilter.GetRawEntities()[0];
             ref PlayerBalanceComponent balance = ref _playerBalancePool.Get(playerEntity);
-            
+
             ref BusinessEconomyComponent economyComponent = ref _economyPool.Get(entity);
-            
+
             bool purchased = isFirstUpgrade
                 ? economyComponent.FirstUpgradeIncome > 0
                 : economyComponent.SecondUpgradeIncome > 0;
@@ -76,22 +78,18 @@ namespace _Project.Scripts.Systems
             if (purchased)
                 return;
 
-            int index = economyComponent.ID;
-                
-            double priceUpgrade = isFirstUpgrade
-                ? _priceUpgradesConfig.PriceFirstUpgrade[index]
-                : _priceUpgradesConfig.PriceSecondUpgrade[index];
+            BusinessBaseInformation business = _businessConfig.GetById(economyComponent.ID);
+            UpgradeInformation upgrade = isFirstUpgrade ? business.Upgrade[0] : business.Upgrade[1];
 
-            double upgradePercent = isFirstUpgrade
-                ? _priceUpgradesConfig.PercentFirstUpgrade[index]
-                : _priceUpgradesConfig.PercentSecondUpgrade[index];
+            double priceUpgrade = upgrade.Price;
+            double upgradePercent = upgrade.Percent;
 
             if (balance.Amount < priceUpgrade)
                 return;
 
             balance.Amount -= priceUpgrade;
             economyComponent.BaseIncome *= upgradePercent + 1;
-            
+
             if (isFirstUpgrade)
                 economyComponent.FirstUpgradeIncome = upgradePercent;
             else
@@ -99,7 +97,7 @@ namespace _Project.Scripts.Systems
 
             if (!_balanceChangedEventPool.Has(playerEntity))
                 _balanceChangedEventPool.Add(playerEntity);
-            
+
             if (!_firstUpgradeChangedEventPool.Has(entity))
                 _firstUpgradeChangedEventPool.Add(entity);
         }

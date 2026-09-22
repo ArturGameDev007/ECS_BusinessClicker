@@ -18,13 +18,8 @@ namespace _Project.Scripts.Infrastructure
     public class GameplayCompositionRoot
     {
         [Header("Configs")] 
-        [SerializeField] private BusinessNamesConfig _businessNamesConfig;
-        [SerializeField] private BarIncomeConfig _barIncomeConfig;
-        [SerializeField] private UpgradeNamesConfig _upgradeNamesConfig;
-        [SerializeField] private PriceLevelUpConfig _levelUpConfig;
-        [SerializeField] private IncomeUpgradesConfig _incomeUpgradesConfig;
-        [SerializeField] private PriceUpgradesConfig _priceUpgradesConfig;
-
+        [SerializeField] private BusinessConfig _businessConfig;
+        
         [Header("Views")] 
         [SerializeField] private BusinessNameView _businessNameView;
         [SerializeField] private ButtonLevelUpView _buttonLevelUpView;
@@ -41,24 +36,24 @@ namespace _Project.Scripts.Infrastructure
         {
             EcsWorld world = new EcsWorld();
             
-            BusinessFactory businessFactory = new BusinessFactory(world, _barIncomeConfig);
+            BusinessFactory businessFactory = new BusinessFactory(world, _businessConfig);
             SaveServices saveServices = new SaveServices();
             
-            BusinessNamePresenter namePresenter = new BusinessNamePresenter(_businessNameView);
+            BusinessNamePresenter namePresenter = new BusinessNamePresenter(_businessNameView, _businessConfig);
             BalancePresenter balancePresenter = new BalancePresenter(world,_balanceView);
             BusinessInformationPresenter informationPresenter = new BusinessInformationPresenter(world, _businessModelView);
             ButtonLevelUpPresenter buttonLevelUpPresenter = new ButtonLevelUpPresenter(_buttonLevelUpView, informationPresenter, world);
-            UpgradeNamesPresenter upgradeNamesPresenter = new UpgradeNamesPresenter(_upgradeNamesView);
-            IncomeUpgradePresenter incomeUpgradePresenter = new IncomeUpgradePresenter(_incomeUpgradeView, _incomeUpgradesConfig);
-            PriceLevelUpPresenter levelUpPresenter = new PriceLevelUpPresenter(_priceView, _levelUpConfig);
-            PriceUpgradePresenter priceUpgradePresenter = new PriceUpgradePresenter(_priceUpgradesView, _priceUpgradesConfig);
+            UpgradeNamesPresenter upgradeNamesPresenter = new UpgradeNamesPresenter(_upgradeNamesView, _businessConfig);
+            IncomeUpgradePresenter incomeUpgradePresenter = new IncomeUpgradePresenter(_incomeUpgradeView, _businessConfig);
+            PriceLevelUpPresenter levelUpPresenter = new PriceLevelUpPresenter(_priceView, _businessConfig);
+            PriceUpgradePresenter priceUpgradePresenter = new PriceUpgradePresenter(_priceUpgradesView, _businessConfig);
             ButtonUpIncomePresenter upIncomePresenter = new ButtonUpIncomePresenter(world, _buttonUpIncomeView, informationPresenter, priceUpgradePresenter);
             BarIncomePresenter incomePresenter = new BarIncomePresenter(world, _barIncomeView);
 
-            EcsSystemManager ecsSystemManager = new EcsSystemManager(world, saveServices, _levelUpConfig, _priceUpgradesConfig);
+            EcsSystemManager ecsSystemManager = new EcsSystemManager(world, saveServices, _businessConfig);
             SaveData saveData = new SaveData(world, saveServices);
             
-            return new GameManager(world, businessFactory, saveServices, _businessNamesConfig, _upgradeNamesConfig, 
+            return new GameManager(world, businessFactory, saveServices, 
                 namePresenter, incomePresenter, buttonLevelUpPresenter, upgradeNamesPresenter, levelUpPresenter, 
                 incomeUpgradePresenter, upIncomePresenter, priceUpgradePresenter, balancePresenter, ecsSystemManager, saveData);
         }

@@ -9,18 +9,15 @@ namespace _Project.Scripts.Infrastructure.EcsCore
     {
         private readonly EcsWorld _world;
         private readonly SaveServices _saveServices;
-        private readonly PriceLevelUpConfig _priceLevelUpConfig;
-        private readonly PriceUpgradesConfig _priceUpgradesConfig;
+        private readonly BusinessConfig _businessConfig;
 
         private EcsSystems _systems;
 
-        public EcsSystemManager(EcsWorld world, SaveServices saveServices,PriceLevelUpConfig priceLevelUpConfig,
-            PriceUpgradesConfig priceUpgradesConfig)
+        public EcsSystemManager(EcsWorld world, SaveServices saveServices, BusinessConfig businessConfig)
         {
             _world = world;
             _saveServices = saveServices;
-            _priceLevelUpConfig = priceLevelUpConfig;
-            _priceUpgradesConfig = priceUpgradesConfig;
+            _businessConfig = businessConfig;
         }
 
         public void Init()
@@ -29,8 +26,8 @@ namespace _Project.Scripts.Infrastructure.EcsCore
 
             _systems
                 .Add(new PlayerInitSystem(_saveServices))
-                .Add(new BuyLevelUpSystem(_priceLevelUpConfig))
-                .Add(new BuyUpgradeSystem(_priceUpgradesConfig))
+                .Add(new BuyLevelUpSystem(_businessConfig))
+                .Add(new BuyUpgradeSystem(_businessConfig))
                 .Add(new BusinessEconomySystem())
                 .Add(new GenerateIncomeSystem())
                 .Init();

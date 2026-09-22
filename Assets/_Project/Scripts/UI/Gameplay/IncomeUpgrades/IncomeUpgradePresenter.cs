@@ -5,18 +5,18 @@ namespace _Project.Scripts.UI.Gameplay.IncomeUpgrades
     public class IncomeUpgradePresenter
     {
         private readonly IncomeUpgradeView _incomeUpgradeView;
-        private readonly IncomeUpgradesConfig _incomeUpgradesConfig;
+        private readonly BusinessConfig _businessConfig;
 
-        public IncomeUpgradePresenter(IncomeUpgradeView incomeUpgradeView, IncomeUpgradesConfig incomeUpgradesConfig)
+        public IncomeUpgradePresenter(IncomeUpgradeView incomeUpgradeView, BusinessConfig businessConfig)
         {
             _incomeUpgradeView = incomeUpgradeView;
-            _incomeUpgradesConfig = incomeUpgradesConfig;
+            _businessConfig = businessConfig;
         }
 
         public void ShowIncomeUpgrades()
         {
-            _incomeUpgradeView?.SetFirstIncomeUpgrades(_incomeUpgradesConfig.FirstIncomeUpgrades);
-            _incomeUpgradeView?.SetSecondIncomeUpgrades(_incomeUpgradesConfig.SecondIncomeUpgrades);
+            _incomeUpgradeView?.SetFirstIncomeUpgrades(_businessConfig.GetFirstIncomeUpgrades());
+            _incomeUpgradeView?.SetSecondIncomeUpgrades(_businessConfig.GetSecondIncomeUpgrades());
         }
     }
 }

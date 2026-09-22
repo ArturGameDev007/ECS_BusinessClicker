@@ -3400,10 +3400,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _gameplayCompositionRoot:
+    _businessConfig: {fileID: 11400000, guid: 6c062be7ca96a12419b79c3b2b311953, type: 2}
     _businessNamesConfig: {fileID: 11400000, guid: 85fe473a9779e0d4cb49df1b6cfcab3b, type: 2}
     _barIncomeConfig: {fileID: 11400000, guid: c252492f0481d2340bd46d00e95c42a1, type: 2}
     _upgradeNamesConfig: {fileID: 11400000, guid: f5418edd8566ac648a545a8fea2227e7, type: 2}
-    _businessInformationConfig: {fileID: 11400000, guid: da2c7b83f8017294ab7ab91f4dbd916e, type: 2}
     _levelUpConfig: {fileID: 11400000, guid: 7609f2fd2d022f14d80afba4d0b171b2, type: 2}
     _incomeUpgradesConfig: {fileID: 11400000, guid: 7e36ad7202fffd441b3f561ca3345de5, type: 2}
     _priceUpgradesConfig: {fileID: 11400000, guid: bb9e17d82d8e6094b99c7418cc225bc2, type: 2}

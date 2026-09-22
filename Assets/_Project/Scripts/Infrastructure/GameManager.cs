@@ -1,4 +1,3 @@
-using _Project.Scripts.Configs;
 using _Project.Scripts.Infrastructure.EcsCore;
 using _Project.Scripts.Services.Save;
 using _Project.Scripts.UI.Gameplay.Balance;
@@ -17,9 +16,6 @@ namespace _Project.Scripts.Infrastructure
         private readonly BusinessFactory _businessFactory;
         private readonly SaveServices _saveServices;
 
-        private readonly BusinessNamesConfig _businessNamesConfig;
-        private readonly UpgradeNamesConfig _upgradeNamesConfig;
-
         private readonly BusinessNamePresenter _businessNamePresenter;
         private readonly BarIncomePresenter _barIncomePresenter;
         private readonly ButtonLevelUpPresenter _buttonLevelUpPresenter;
@@ -35,8 +31,7 @@ namespace _Project.Scripts.Infrastructure
 
         private EcsSystems _systems;
 
-        public GameManager(EcsWorld world, BusinessFactory businessFactory, SaveServices saveServices,
-            BusinessNamesConfig businessNamesConfig, UpgradeNamesConfig upgradeNamesConfig,
+        public GameManager(EcsWorld world, BusinessFactory businessFactory, SaveServices saveServices, 
             BusinessNamePresenter businessNamePresenter, BarIncomePresenter barIncomePresenter, ButtonLevelUpPresenter buttonLevelUpPresenter,
             UpgradeNamesPresenter upgradeNamesPresenter, PriceLevelUpPresenter levelUpPresenter, IncomeUpgradePresenter incomeUpgradePresenter,
             ButtonUpIncomePresenter buttonUpIncomePresenter, PriceUpgradePresenter priceUpgradePresenter,
@@ -45,8 +40,6 @@ namespace _Project.Scripts.Infrastructure
             _world = world;
             _businessFactory = businessFactory;
             _saveServices = saveServices;
-            _businessNamesConfig = businessNamesConfig;
-            _upgradeNamesConfig = upgradeNamesConfig;
             _businessNamePresenter = businessNamePresenter;
             _barIncomePresenter = barIncomePresenter;
             _buttonLevelUpPresenter = buttonLevelUpPresenter;
@@ -117,8 +110,8 @@ namespace _Project.Scripts.Infrastructure
 
         private void BusinessNames()
         {
-            _businessNamePresenter?.ShowBusinessName(_businessNamesConfig.Names);
-            _upgradeNamesPresenter?.ShowUpgradeNames(_upgradeNamesConfig.FirstUpgradeName, _upgradeNamesConfig.SecondUpgradeName);
+            _businessNamePresenter?.ShowBusinessName();
+            _upgradeNamesPresenter?.ShowUpgradeNames();
         }
 
         private void UpdateUI()

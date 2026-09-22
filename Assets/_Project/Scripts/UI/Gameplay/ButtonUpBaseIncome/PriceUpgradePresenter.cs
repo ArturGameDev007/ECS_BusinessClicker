@@ -5,19 +5,19 @@ namespace _Project.Scripts.UI.Gameplay.ButtonUpBaseIncome
     public class PriceUpgradePresenter
     {
         private readonly PriceUpgradesView _priceUpgradesView;
-        private readonly PriceUpgradesConfig _priceUpgradesConfig;
+        private readonly BusinessConfig _businessConfig;
         
-        public PriceUpgradePresenter(PriceUpgradesView priceUpgradesView,  PriceUpgradesConfig priceUpgradesConfig)
+        public PriceUpgradePresenter(PriceUpgradesView priceUpgradesView,  BusinessConfig businessConfig)
         {
             _priceUpgradesView = priceUpgradesView;
-            _priceUpgradesConfig = priceUpgradesConfig;
+            _businessConfig = businessConfig;
         }
         
         public void ShowPriceFirstUpgrade()
         {
             if (_priceUpgradesView != null)
             {
-                _priceUpgradesView.SetPriceFirstUpgrade(_priceUpgradesConfig.PriceFirstUpgrade);
+                _priceUpgradesView.SetPriceFirstUpgrade(_businessConfig.GetAllFirstPriceUpgrades());
             }
         }
 
@@ -25,7 +25,7 @@ namespace _Project.Scripts.UI.Gameplay.ButtonUpBaseIncome
         {
             if (_priceUpgradesView != null)
             {
-                _priceUpgradesView.SetPriceSecondUpgrade(_priceUpgradesConfig.PriceSecondUpgrade);
+                _priceUpgradesView.SetPriceSecondUpgrade(_businessConfig.GetAllSecondPriceUpgrades());
             }
         }
         
